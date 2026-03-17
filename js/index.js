@@ -24,6 +24,19 @@ async function sendChat() {
     }
 }
 
+function checkMemory() {
+    fetch('http://localhost:5000/memory')
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById('display').innerText = `rss: ${Math.round(data.rss / 1024 / 1024)} MB,          -- Resident Set Size
+  heapTotal: ${Math.round(data.heapTotal / 1024 / 1024)} MB, -- Total V8 heap
+  heapUsed: ${Math.round(data.heapUsed / 1024 / 1024)} MB,   -- Actual memory used
+  external: ${Math.round(data.external / 1024 / 1024)} MB,   -- C++ objects`;
+        });
+}
+
+window.setInterval(checkMemory, 1);
+
 document.getElementById('sendButton').addEventListener('click', sendChat);
 
 document.getElementById('userInput').addEventListener("keydown", function (event) {

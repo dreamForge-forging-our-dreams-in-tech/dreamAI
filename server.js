@@ -40,6 +40,10 @@ app.post('/chat', async (req, res) => {
   }
 });
 
+app.get('/memory', async (req, res) => {
+    res.json(process.memoryUsage());
+});
+
 app.listen(PORT, () => {
   console.log(`✅ dreamAi interface is active at http://localhost:${PORT}`);
 });
