@@ -24,6 +24,7 @@ async function sendChat() {
     }
 }
 
+// function to check memory usage every second
 function checkMemory() {
     fetch('http://localhost:5000/memory')
         .then(res => res.json())
@@ -35,8 +36,9 @@ function checkMemory() {
         });
 }
 
-window.setInterval(checkMemory, 1);
+window.setInterval(checkMemory, 1000);
 
+//connect events to elements
 document.getElementById('sendButton').addEventListener('click', sendChat);
 
 document.getElementById('userInput').addEventListener("keydown", function (event) {

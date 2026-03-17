@@ -40,7 +40,7 @@ app.post('/chat', async (req, res) => {
   }
 });
 
-app.get('/memory', async (req, res) => {
+app.get('/memory', async (re, res) => {
     res.json(process.memoryUsage());
 });
 
