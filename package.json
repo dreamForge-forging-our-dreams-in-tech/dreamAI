@@ -1,0 +1,25 @@
+{
+  "name": "dramai",
+  "version": "1.0.0",
+  "description": "dreamAi is dreamForge its ai, its optimized for roleplaying and low end devices like the ASRock 100ht from 2010",
+  "keywords": [],
+  "homepage": "https://github.com/dreamForge-forging-our-dreams-in-tech/dreamAI#readme",
+  "bugs": {
+    "url": "https://github.com/dreamForge-forging-our-dreams-in-tech/dreamAI/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dreamForge-forging-our-dreams-in-tech/dreamAI.git"
+  },
+  "license": "SEE LICENSE IN LICENSE",
+  "author": "dreamForge",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1"
+  }
+}

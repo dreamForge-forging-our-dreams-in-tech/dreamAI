@@ -1,0 +1,41 @@
+body {
+    font-family: sans-serif;
+    background: #1a1a1a;
+    color: #eee;
+    padding: 20px;
+}
+
+#chatbox {
+    border: 1px solid #444;
+    height: 300px;
+    overflow-y: scroll;
+    padding: 10px;
+    margin-bottom: 10px;
+    background: #222;
+}
+
+input {
+    width: 80%;
+    padding: 10px;
+    background: #333;
+    color: white;
+    border: 1px solid #555;
+}
+
+button {
+    padding: 10px 20px;
+    cursor: pointer;
+    background: #007bff;
+    color: white;
+    border: none;
+}
+
+.user {
+    color: #00d4ff;
+    font-weight: bold;
+}
+
+.ai {
+    color: #00ff88;
+    font-weight: bold;
+}
