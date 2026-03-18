@@ -31,7 +31,7 @@ app.post('/chat', async (req, res) => {
 
     const userPrompt = req.body.prompt;
 
-    const response = tokenizer.de_tokenize(tokenizer.tokenize(userPrompt));
+    const response = tokenizer.tokenize(userPrompt);
 
     res.json({ reply: response });
 
