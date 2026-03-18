@@ -21,7 +21,7 @@ class Tokenizer {
         const sortedKeys = Object.keys(tokenizer_data).sort((a, b) => b.length - a.length);
 
         //add a new word that it doesn't know yet to tokenizer_data.json
-        processedInput.split('/[\s,.;!?]+/').forEach(word => {
+        processedInput.split(' ').forEach(word => {
             if (!sortedKeys.includes(word)) {
                 this.add_word(word);
             }
