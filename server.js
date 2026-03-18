@@ -3,7 +3,8 @@ import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-import { tokenize } from './AI/tokenizer/tokenizer.js';
+import { Tokenizer } from './AI/tokenizer/tokenizer.js';
+let tokenizer = new Tokenizer();
 
 const app = express();
 const PORT = 5000;
@@ -30,7 +31,7 @@ app.post('/chat', async (req, res) => {
 
     const userPrompt = req.body.prompt;
 
-    const response = tokenize(userPrompt)
+    const response = tokenizer.de_tokenize(tokenizer.tokenize(userPrompt));
 
     res.json({ reply: response });
 
