@@ -6,9 +6,6 @@ import { fileURLToPath } from 'url';
 import { Tokenizer } from './AI/tokenizer/tokenizer.js';
 let tokenizer = new Tokenizer();
 
-import { dreamAI } from './AI/prompt_builder/prompt_generator.js';
-let dream_ai = new dreamAI();
-
 const app = express();
 const PORT = 5000;
 
@@ -34,7 +31,7 @@ app.post('/chat', async (req, res) => {
 
     const userPrompt = req.body.prompt;
 
-    const response = dream_ai.generate_prompt(tokenizer.tokenize(userPrompt));
+    const response = tokenizer.de_tokenize(tokenizer.tokenize(userPrompt));
 
     res.json({ reply: response });
 
