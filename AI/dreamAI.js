@@ -4,34 +4,23 @@ if (typeof nodeUtil.isNullOrUndefined !== 'function') {
 
 import * as tf from '@tensorflow/tfjs-node';
 import * as nodeUtil from 'util';
+import { readFile } from 'node:fs/promises';
 
 let training_progress = {};
 
+let model;
+
 // --- DATA & RAG CONFIG ---
-const trainingData = [
-    "Context: Hero. User: Hi. Response: Greetings!",
-    "Context: Hero. User: Help. Response: I shall protect you.",
-    "Context: Villain. User: Hi. Response: Foolish mortal.",
-    "Context: Villain. User: Stop. Response: Never! The world is mine."
-];
+// keep it empty as it will be filled
+let trainingData = [];
 
-const text = trainingData.join('\n');
-const chars = [...new Set(text)].sort();
-const charToId = Object.fromEntries(chars.map((c, i) => [c, i]));
-const idToChar = Object.fromEntries(chars.map((c, i) => [i, c]));
-const vocabSize = chars.length;
-const seqLength = 30; // Matches your ASRock's limited cache better
+let text;
+let chars;
+let charToId;
+let idToChar;
+let vocabSize;
 
-// --- MODEL ARCHITECTURE ---
-const model = tf.sequential();
-model.add(tf.layers.embedding({ inputDim: vocabSize, outputDim: 16, inputLength: seqLength }));
-model.add(tf.layers.lstm({ units: 64, returnSequences: false })); // Lower units for speed
-model.add(tf.layers.dense({ units: vocabSize, activation: 'softmax' }));
-
-model.compile({
-    loss: 'categoricalCrossentropy',
-    optimizer: tf.train.adam(0.01) // Slightly higher learning rate for small data
-});
+let seqLength = 30; // Matches your ASRock's limited cache better
 
 class dreamAI {
     construct() {
@@ -41,8 +30,62 @@ class dreamAI {
         return JSON.stringify(training_progress);
     }
 
+    async compile_ai(character_file_path) { // compiel the ai using the training data and other variables.
+        return new Promise(async (resolve, reject) => {
+            try {
+
+                trainingData = await this.build_trainging_data(character_file_path);
+
+                text = trainingData.join('\n');
+                chars = [...new Set(text)].sort();
+                charToId = Object.fromEntries(chars.map((c, i) => [c, i]));
+                idToChar = Object.fromEntries(chars.map((c, i) => [i, c]));
+                vocabSize = chars.length;
+                seqLength = 30;
+
+                // --- MODEL ARCHITECTURE ---
+                model = tf.sequential();
+                model.add(tf.layers.embedding({ inputDim: vocabSize, outputDim: 16, inputLength: seqLength }));
+                model.add(tf.layers.lstm({ units: 64, returnSequences: false })); // Lower units for speed
+                model.add(tf.layers.dense({ units: vocabSize, activation: 'softmax' }));
+
+                model.compile({
+                    loss: 'categoricalCrossentropy',
+                    optimizer: tf.train.adam(0.01) // Slightly higher learning rate for small data
+                });
+                resolve();
+            } catch (error) {
+                console.error('Error reading the JSON file:', error);
+                reject(error);
+            }
+        });
+    }
+
+    async build_trainging_data(character_file_path) { // dynamically builds the trianing data of the AI using the character card json file
+        return new Promise(async (resolve, reject) => {
+            try {
+                // Read the file as a string
+                const data = await readFile(character_file_path, 'utf8');
+
+                // Parse the string into a JavaScript object
+                const character_json = JSON.parse(data);
+
+                let training_data = [
+                    `Context: . User: What is your name?. Response: My name is ${character_json.Name}`,
+                    `Context: . User: Hello ${character_json.Name}. Response: Hi, how are you?`,
+                ];
+                resolve(training_data);
+            } catch (error) {
+                console.error('Error reading the JSON file:', error);
+                reject(error);
+            }
+        });
+    }
+
     // --- TRAINING ---
-    async train(characterDefinition) { // train the ai on the available training generated based on the characters definition
+    async train(character_file_path) { // train the ai on the available training generated based on the characters definition
+        await this.compile_ai(character_file_path);
+
         const inputs = [];
         const labels = [];
         for (let i = 0; i < text.length - seqLength; i++) {

@@ -30,7 +30,7 @@ app.post('/chat', async (req, res) => {
   try {
     const userPrompt = req.body.prompt;
 
-    dream_ai.train().then(async () => {
+    dream_ai.train('./characters/Marie.json').then(async () => {
       const reply = await dream_ai.generate_prompt("Hero", userPrompt);
       console.log("\nAI says:", reply);
 
