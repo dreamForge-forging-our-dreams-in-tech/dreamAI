@@ -13,16 +13,15 @@ dreamAi uses tensorflow.tfjs to build its llm and uses character cards and contr
 <https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT8GWQKXDIsvdo2Crjeaq2R4kU8WZKZGJa3xA&s>
 
 # API
+Although dreamAi comes with its own frontend users are allowed to build their own front ends and can use the below API endpoints to do so!
 
 ## /chat
 
 ## /memory
-
 This is a GET api endpoint and returns the total memory used by the AI and the node process.
 
 ## /progress
-
-hHis is a GET api endpoint that returns a JSOn with information regarding the training progress of the AI.
+This is a GET api endpoint that returns a JSON with information regarding the training progress of the AI.
 
 {
     epoch: epoch + 1, -- the current epoch it's training
