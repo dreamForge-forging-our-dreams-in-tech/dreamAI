@@ -3,7 +3,7 @@ import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-import { dreamAI } from './AI/prompt_builder/prompt_generator.js';
+import { dreamAI } from './AI/dreamAI.js';
 let dream_ai = new dreamAI();
 
 const app = express();

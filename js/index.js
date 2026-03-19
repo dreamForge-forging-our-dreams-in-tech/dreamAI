@@ -1,4 +1,6 @@
 async function sendChat() {
+    checkStatuses(); // checks all statuses when a new message is send
+    
     const box = document.getElementById('chatbox');
     const input = document.getElementById('userInput');
     const text = input.value;
@@ -40,9 +42,14 @@ function checkStatuses() {
         .then(data => {
             data = JSON.parse(data);
 
-            document.getElementById('training_progress').innerHTML = `Training in progress: \n
-            Epoch: ${data.epoch} \n
-            Loss: ${data.loss}`;
+            if (data.total_epochs === 'undefined' || data.total_epochs == data.epoch) {
+                document.getElementById('training_progress').innerHTML = `Training finished/not in progress.`;
+            } else {
+
+                document.getElementById('training_progress').innerHTML = `Training in progress: \n
+                Epoch: ${data.epoch}/${data.total_epochs} \n
+                Loss: ${data.loss}`;
+            }
         });
 }
 

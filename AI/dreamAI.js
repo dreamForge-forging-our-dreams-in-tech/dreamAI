@@ -57,8 +57,12 @@ class dreamAI {
         await model.fit(xs, ys, {
             epochs: 100,
             callbacks: {
-                onEpochEnd: (epoch, logs) => {
-                    training_progress = {"epoch": epoch + 1, "loss": logs.loss.toFixed(4)}
+                onEpochEnd: function (epoch, logs) {
+                    training_progress = {
+                        epoch: epoch + 1,
+                        loss: logs.loss.toFixed(4),
+                        total_epochs: this.params.epochs
+                    };
 
                     console.log(`Epoch ${epoch}: loss = ${logs.loss}`);
                 }
