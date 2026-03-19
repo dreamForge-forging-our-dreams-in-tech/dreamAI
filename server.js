@@ -3,8 +3,8 @@ import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-import { Tokenizer } from './AI/tokenizer/tokenizer.js';
-let tokenizer = new Tokenizer();
+import { dreamAI } from './AI/prompt_builder/prompt_generator.js';
+let dream_ai = new dreamAI();
 
 const app = express();
 const PORT = 5000;
@@ -27,13 +27,15 @@ app.get('/', (req, res) => {
 
 // --- CHAT ENDPOINT ---
 app.post('/chat', async (req, res) => {
-     try {
-
+  try {
     const userPrompt = req.body.prompt;
 
-    const response = tokenizer.tokenize(userPrompt);
+    dream_ai.train().then(async () => {
+      const reply = await roleplay("Hero", userPrompt);
+      console.log("\nAI says:", reply);
 
-    res.json({ reply: response });
+      res.json({ reply: reply });
+    });
 
   } catch (error) {
     console.error("Ollama Error:", error);
@@ -42,7 +44,7 @@ app.post('/chat', async (req, res) => {
 });
 
 app.get('/memory', async (re, res) => {
-    res.json(process.memoryUsage());
+  res.json(process.memoryUsage());
 });
 
 app.listen(PORT, () => {
