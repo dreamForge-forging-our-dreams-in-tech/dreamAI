@@ -24,8 +24,8 @@ async function sendChat() {
     }
 }
 
-// function to check memory usage every second
-function checkMemory() {
+// make calls to all api ends and checks for the statusses they return and shows them to the user.
+function checkStatuses() {
     fetch('http://localhost:5000/memory')
         .then(res => res.json())
         .then(data => {
@@ -34,9 +34,19 @@ function checkMemory() {
   heapUsed: ${Math.round(data.heapUsed / 1024 / 1024)} MB,   -- Actual memory used
   external: ${Math.round(data.external / 1024 / 1024)} MB,   -- C++ objects`;
         });
+
+    fetch('http://localhost:5000/progress')
+        .then(res => res.json())
+        .then(data => {
+            data = JSON.parse(data);
+
+            document.getElementById('training_progress').innerHTML = `Training in progress: \n
+            Epoch: ${data.epoch} \n
+            Loss: ${data.loss}`;
+        });
 }
 
-window.setInterval(checkMemory, 1000);
+window.setInterval(checkStatuses, 1000);
 
 //connect events to elements
 document.getElementById('sendButton').addEventListener('click', sendChat);

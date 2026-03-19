@@ -31,19 +31,23 @@ app.post('/chat', async (req, res) => {
     const userPrompt = req.body.prompt;
 
     dream_ai.train().then(async () => {
-      const reply = await roleplay("Hero", userPrompt);
+      const reply = await dream_ai.generate_prompt("Hero", userPrompt);
       console.log("\nAI says:", reply);
 
       res.json({ reply: reply });
     });
 
   } catch (error) {
-    console.error("Ollama Error:", error);
+    console.error(error);
     res.status(500).json({ error: "Check if Ollama is running on the ASRock." });
   }
 });
 
-app.get('/memory', async (re, res) => {
+app.get('/progress', async (req, res) => { // trianing progress api endpoint, returns training progress
+  res.json(dream_ai.get_training_progress());
+});
+
+app.get('/memory', async (re, res) => { // memory api endpoint returns all used memory by the AI and node.
   res.json(process.memoryUsage());
 });
 

@@ -5,6 +5,8 @@ if (typeof nodeUtil.isNullOrUndefined !== 'function') {
 import * as tf from '@tensorflow/tfjs-node';
 import * as nodeUtil from 'util';
 
+let training_progress = {};
+
 // --- DATA & RAG CONFIG ---
 const trainingData = [
     "Context: Hero. User: Hi. Response: Greetings!",
@@ -31,18 +33,16 @@ model.compile({
     optimizer: tf.train.adam(0.01) // Slightly higher learning rate for small data
 });
 
-// // RUN IT
-// train().then(async () => {
-//     const reply = await roleplay("Hero", "Hi");
-//     console.log("\nAI says:", reply);
-// });
-
 class dreamAI {
     construct() {
-
     }
+
+    get_training_progress() { // returns the training progress
+        return JSON.stringify(training_progress);
+    }
+
     // --- TRAINING ---
-    async train() {
+    async train(characterDefinition) { // train the ai on the available training generated based on the characters definition
         const inputs = [];
         const labels = [];
         for (let i = 0; i < text.length - seqLength; i++) {
@@ -54,12 +54,21 @@ class dreamAI {
         const ys = tf.oneHot(tf.tensor1d(labels, 'int32'), vocabSize);
 
         console.log("Training starting on C++ Backend...");
-        await model.fit(xs, ys, { epochs: 150, batchSize: 16 });
+        await model.fit(xs, ys, {
+            epochs: 100,
+            callbacks: {
+                onEpochEnd: (epoch, logs) => {
+                    training_progress = {"epoch": epoch + 1, "loss": logs.loss.toFixed(4)}
+
+                    console.log(`Epoch ${epoch}: loss = ${logs.loss}`);
+                }
+            }
+        });
         console.log("Training complete.");
     }
 
     // --- GENERATION (The Roleplay Output) ---
-    async roleplay(context, userMsg) {
+    async generate_prompt(context, userMsg) { // generate a prompt to return to the user using the users message and rag context keywords
         let inputStr = `Context: ${context}. User: ${userMsg}. Response: `;
         let currentSeq = inputStr.slice(-seqLength).padStart(seqLength, ' ');
         let result = "";
