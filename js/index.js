@@ -1,4 +1,4 @@
-let location = window.location.href; // location of the url bar used to send to correct api endpoints
+let location = window.location.origin; // location of the url bar used to send to correct api endpoints
 
 let hardware_information = document.getElementById('display');
 
@@ -15,7 +15,7 @@ async function sendChat() {
     input.value = '';
 
     try {
-        const res = await fetch(location + 'chat', {
+        const res = await fetch(location + '/chat', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ prompt: text })
@@ -32,7 +32,7 @@ async function sendChat() {
 
 // make calls to all api ends and checks for the statusses they return and shows them to the user.
 function checkStatuses() {
-    fetch(location + 'OS-information')
+    fetch(location + '/OS-information')
         .then(res => res.json())
         .then(data => {
             hardware_information.innerText = `rss: ${Math.round(data.Process.rss / 1024 / 1024)} MB,          -- Resident Set Size
@@ -57,7 +57,7 @@ function checkStatuses() {
             }
         });
 
-    fetch(location + 'progress')
+    fetch(location + '/progress')
         .then(res => res.json())
         .then(data => {
             data = JSON.parse(data);
