@@ -100,7 +100,7 @@ class dreamAI {
                     training_progress = {
                         epoch: epoch + 1,
                         loss: logs.loss.toFixed(4),
-                        total_epochs: 100
+                        total_epochs: this.paramas.epoch
                     };
                     console.log(`Epoch ${epoch}: loss = ${logs.loss}`);
                 }
