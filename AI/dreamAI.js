@@ -94,7 +94,7 @@ class dreamAI {
 
         console.log("🚀 Training starting on CPU Backend...");
         await model.fit(xs, ys, {
-            epochs: 100,
+            epochs: 40,
             callbacks: {
                 onEpochEnd: (epoch, logs) => {
                     training_progress = {
