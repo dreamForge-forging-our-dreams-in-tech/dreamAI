@@ -2,6 +2,10 @@
 
 dreamAi is dreamForge its attempt at creating an advanced roleplaying ai that can run on hardware from the 2000s.
 
+# Licensing
+You can find the license for this project under LICENSE.
+Please be aware that when using this for any comemrcially available product you are required to provide credits towards dreamForge.
+
 # Tested devices
 
 * Modified ASRock Vision 100ht from 2010.
