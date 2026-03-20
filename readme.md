@@ -3,6 +3,7 @@
 dreamAi is dreamForge its attempt at creating an advanced roleplaying ai that can run on hardware from the 2000s.
 
 # Licensing
+
 You can find the license for this project under LICENSE.
 Please be aware that when using this for any comemrcially available product you are required to provide credits towards dreamForge.
 
@@ -17,14 +18,34 @@ dreamAi uses tensorflow.tfjs to build its llm and uses character cards and contr
 <https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT8GWQKXDIsvdo2Crjeaq2R4kU8WZKZGJa3xA&s>
 
 # API
+
 Although dreamAi comes with its own frontend users are allowed to build their own front ends and can use the below API endpoints to do so!
 
 ## /chat
 
-## /memory
-This is a GET api endpoint and returns the total memory used by the AI and the node process.
+## /OS-information
+
+This is a GET api endpoint for hardware information of the device.
+
+{
+
+    "Total RAM": toGB(totalMemory), // all available Ram
+    "Avaialble RAM": toGB(freeMemory), // avaialble ram (what is not in use)
+    "Used RAM": toGB(usedMemory), // Used rem
+    "CPU Temp": cpuTemp.main, // CPU temperatures
+    "GPUs": gpu_data_array, //GPU information such as model name and temperature
+      "Process": process.memoryUsage()
+}
+
+GPUs object:
+{
+    "index": index, // GPU index aka which of the how many installed
+    "model": gpu.model, // The gpu model name
+    "temp": gpu.temperatureGpu // GPU temperature.
+}
 
 ## /progress
+
 This is a GET api endpoint that returns a JSON with information regarding the training progress of the AI.
 
 {

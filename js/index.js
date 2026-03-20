@@ -1,8 +1,10 @@
 let location = window.location.href; // location of the url bar used to send to correct api endpoints
 
+let hardware_information = document.getElementById('display');
+
 async function sendChat() {
     checkStatuses(); // checks all statuses when a new message is send
-    
+
     const box = document.getElementById('chatbox');
     const input = document.getElementById('userInput');
     const text = input.value;
@@ -30,13 +32,29 @@ async function sendChat() {
 
 // make calls to all api ends and checks for the statusses they return and shows them to the user.
 function checkStatuses() {
-    fetch(location + 'memory')
+    fetch(location + 'OS-information')
         .then(res => res.json())
         .then(data => {
-            document.getElementById('display').innerText = `rss: ${Math.round(data.rss / 1024 / 1024)} MB,          -- Resident Set Size
-  heapTotal: ${Math.round(data.heapTotal / 1024 / 1024)} MB, -- Total V8 heap
-  heapUsed: ${Math.round(data.heapUsed / 1024 / 1024)} MB,   -- Actual memory used
-  external: ${Math.round(data.external / 1024 / 1024)} MB,   -- C++ objects`;
+            hardware_information.innerText = `rss: ${Math.round(data.Process.rss / 1024 / 1024)} MB,          -- Resident Set Size
+  heapTotal: ${Math.round(data.Process.heapTotal / 1024 / 1024)} MB, -- Total V8 heap
+  heapUsed: ${Math.round(data.Process.heapUsed / 1024 / 1024)} MB,   -- Actual memory used
+  external: ${Math.round(data.Process.external / 1024 / 1024)} MB,   -- C++ objects
+  
+  total ram: ${data["Total RAM"]}
+  used ram: ${data["Used RAM"]}
+  availalbe ram: ${data["Avaialble RAM"]}
+
+  CPU temperature: ${data['CPU Temp']} °C
+
+  `;
+
+            let i;
+
+            for (i of Object.keys(data.GPUs)) {
+                hardware_information.innerText += `Index: ${i}
+                GPU: ${data.GPUs[i].model}
+                Temperature: ${data.GPUs[i].temp}`
+            }
         });
 
     fetch(location + 'progress')

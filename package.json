@@ -23,6 +23,7 @@
     "@tensorflow/tfjs-backend-wasm": "^4.22.0",
     "@tensorflow/tfjs-node": "^4.22.0",
     "cors": "^2.8.6",
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "systeminformation": "^5.31.5"
   }
 }

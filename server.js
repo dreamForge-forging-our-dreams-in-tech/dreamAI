@@ -3,6 +3,9 @@ import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
+import os from 'os';
+import si from 'systeminformation';
+
 import { dreamAI } from './AI/dreamAI.js';
 let dream_ai = new dreamAI();
 
@@ -47,8 +50,40 @@ app.get('/progress', async (req, res) => { // trianing progress api endpoint, re
   res.json(dream_ai.get_training_progress());
 });
 
-app.get('/memory', async (re, res) => { // memory api endpoint returns all used memory by the AI and node.
-  res.json(process.memoryUsage());
+app.get('/OS-information', async (re, res) => { // returns all the available debugging information for the OS
+  try {
+    const toGB = (bytes) => (bytes / (1024 ** 3)).toFixed(2);
+
+    const totalMemory = os.totalmem();
+    const freeMemory = os.freemem();
+    const usedMemory = totalMemory - freeMemory;
+
+    // 1. CPU Temperature
+    const cpuTemp = await si.cpuTemperature();
+
+    // 2. GPU Data (includes temperature where supported)
+    let gpu_data_array = {};
+    const gpuData = await si.graphics();
+    gpuData.controllers.forEach((gpu, index) => {
+      gpu_data_array[index] = {
+        "index": index,
+        "model": gpu.model,
+        "temp": gpu.temperatureGpu
+      }
+    });
+
+    res.json({
+      "Total RAM": toGB(totalMemory),
+      "Avaialble RAM": toGB(freeMemory),
+      "Used RAM": toGB(usedMemory),
+      "CPU Temp": cpuTemp.main,
+      "GPUs": gpu_data_array,
+      "Process": process.memoryUsage()
+    });
+
+  } catch (e) {
+    console.error("Error fetching temps:", e);
+  }
 });
 
 app.listen(PORT, '0.0.0.0', () => {
