@@ -51,6 +51,6 @@ app.get('/memory', async (re, res) => { // memory api endpoint returns all used 
   res.json(process.memoryUsage());
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`✅ dreamAi interface is active at http://localhost:${PORT}`);
 });
