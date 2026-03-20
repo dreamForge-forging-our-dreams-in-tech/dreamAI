@@ -50,39 +50,47 @@ app.get('/progress', async (req, res) => { // trianing progress api endpoint, re
   res.json(dream_ai.get_training_progress());
 });
 
-app.get('/OS-information', async (re, res) => { // returns all the available debugging information for the OS
+app.get('/OS-information', async (req, res) => {
   try {
     const toGB = (bytes) => (bytes / (1024 ** 3)).toFixed(2);
-
     const totalMemory = os.totalmem();
     const freeMemory = os.freemem();
-    const usedMemory = totalMemory - freeMemory;
 
-    // 1. CPU Temperature
-    const cpuTemp = await si.cpuTemperature();
+    // Initialize defaults in case hardware calls fail
+    let cpuMainTemp = "N/A";
+    let gpus = {};
 
-    // 2. GPU Data (includes temperature where supported)
-    let gpu_data_array = {};
-    const gpuData = await si.graphics();
-    gpuData.controllers.forEach((gpu, index) => {
-      gpu_data_array[index] = {
-        "index": index,
-        "model": gpu.model,
-        "temp": gpu.temperatureGpu
+    try {
+      const cpuTemp = await si.cpuTemperature();
+      cpuMainTemp = cpuTemp.main || "N/A";
+    } catch (e) { console.error("CPU temp fail"); }
+
+    try {
+      const gpuData = await si.graphics();
+      if (gpuData.controllers) {
+        gpuData.controllers.forEach((gpu, index) => {
+          gpus[index] = {
+            "index": index,
+            "model": gpu.model || "Unknown",
+            "temp": gpu.temperatureGpu || "N/A"
+          }
+        });
       }
-    });
+    } catch (e) { console.error("GPU data fail"); }
 
     res.json({
       "Total RAM": toGB(totalMemory),
       "Avaialble RAM": toGB(freeMemory),
-      "Used RAM": toGB(usedMemory),
-      "CPU Temp": cpuTemp.main,
-      "GPUs": gpu_data_array,
+      "Used RAM": toGB(totalMemory - freeMemory),
+      "CPU Temp": cpuMainTemp,
+      "GPUs": gpus,
       "Process": process.memoryUsage()
     });
 
-  } catch (e) {
-    console.error("Error fetching temps:", e);
+  } catch (error) {
+    console.error("Global OS Info Error:", error);
+    // CRITICAL: Always send a JSON response even on failure
+    res.status(500).json({ error: "Internal Server Error", GPUs: {} });
   }
 });
 
