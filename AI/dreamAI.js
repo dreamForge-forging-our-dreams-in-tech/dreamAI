@@ -1,10 +1,27 @@
+import * as nodeUtil from 'util';
+import { readFile } from 'node:fs/promises';
+
+// Import the core library only once
+import * as tf from '@tensorflow/tfjs'; 
+
+// Import the WASM backend (this registers it automatically)
+import '@tensorflow/tfjs-backend-wasm'; 
+
 if (typeof nodeUtil.isNullOrUndefined !== 'function') {
     nodeUtil.isNullOrUndefined = (v) => v === null || v === undefined;
 }
 
-import * as tf from '@tensorflow/tfjs-node';
-import * as nodeUtil from 'util';
-import { readFile } from 'node:fs/promises';
+async function setupTensorFlow() {
+    try {
+        // Set the backend to wasm and wait for it to be ready
+        await tf.setBackend('wasm');
+        await tf.ready(); 
+        console.log("✅ TensorFlow Backend set to:", tf.getBackend());
+    } catch (e) {
+        console.error("❌ Failed to set WASM backend:", e);
+    }
+}
+setupTensorFlow();
 
 let training_progress = {};
 

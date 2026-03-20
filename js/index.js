@@ -1,3 +1,5 @@
+let location = window.location.href; // location of the url bar used to send to correct api endpoints
+
 async function sendChat() {
     checkStatuses(); // checks all statuses when a new message is send
     
@@ -11,7 +13,7 @@ async function sendChat() {
     input.value = '';
 
     try {
-        const res = await fetch('http://localhost:5000/chat', {
+        const res = await fetch(location + 'chat', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ prompt: text })
@@ -28,7 +30,7 @@ async function sendChat() {
 
 // make calls to all api ends and checks for the statusses they return and shows them to the user.
 function checkStatuses() {
-    fetch('http://localhost:5000/memory')
+    fetch(location + 'memory')
         .then(res => res.json())
         .then(data => {
             document.getElementById('display').innerText = `rss: ${Math.round(data.rss / 1024 / 1024)} MB,          -- Resident Set Size
@@ -37,7 +39,7 @@ function checkStatuses() {
   external: ${Math.round(data.external / 1024 / 1024)} MB,   -- C++ objects`;
         });
 
-    fetch('http://localhost:5000/progress')
+    fetch(location + 'progress')
         .then(res => res.json())
         .then(data => {
             data = JSON.parse(data);
