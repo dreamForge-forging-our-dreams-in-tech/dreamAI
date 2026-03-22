@@ -31,6 +31,7 @@ async function setInferenceBackend() {
     }
 }
 
+let total_epochs = 40; // how many epochs training will have.
 let training_progress = {};
 let model;
 let trainingData = [];
@@ -94,13 +95,13 @@ class dreamAI {
 
         console.log("🚀 Training starting on CPU Backend...");
         await model.fit(xs, ys, {
-            epochs: 40,
+            epochs: total_epochs,
             callbacks: {
                 onEpochEnd: (epoch, logs) => {
                     training_progress = {
                         epoch: epoch + 1,
                         loss: logs.loss.toFixed(4),
-                        total_epochs: this.paramas.epoch
+                        total_epochs: total_epochs
                     };
                     console.log(`Epoch ${epoch}: loss = ${logs.loss}`);
                 }

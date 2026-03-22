@@ -66,8 +66,8 @@ function checkStatuses() {
                 document.getElementById('training_progress').innerHTML = `Training finished/not in progress.`;
             } else {
 
-                document.getElementById('training_progress').innerHTML = `Training in progress: \n
-                Epoch: ${data.epoch}/${data.total_epochs} \n
+                document.getElementById('training_progress').innerHTML = `Training in progress: <br>
+                Epoch: ${data.epoch}/${data.total_epochs} <br>
                 Loss: ${data.loss}`;
             }
         });
