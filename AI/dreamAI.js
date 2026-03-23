@@ -6,6 +6,8 @@ import * as tf from '@tensorflow/tfjs';
 import '@tensorflow/tfjs-backend-wasm'; 
 import '@tensorflow/tfjs-backend-cpu'; 
 
+import { Evie } from './evie.js';
+
 // Polyfill for older environments
 if (typeof nodeUtil.isNullOrUndefined !== 'function') {
     nodeUtil.isNullOrUndefined = (v) => v === null || v === undefined;
@@ -61,7 +63,7 @@ class dreamAI {
 
             model.compile({
                 loss: 'categoricalCrossentropy',
-                optimizer: tf.train.adam(0.01)
+                optimizer: Evie(0.01)
             });
         } catch (error) {
             console.error('Error compiling AI:', error);
@@ -72,6 +74,7 @@ class dreamAI {
     async build_trainging_data(character_file_path) {
         const data = await readFile(character_file_path, 'utf8');
         const character_json = JSON.parse(data);
+        
         return [
             `Context: . User: What is your name?. Response: My name is ${character_json.Name}`,
             `Context: . User: Hello ${character_json.Name}. Response: Hi, how are you?`,

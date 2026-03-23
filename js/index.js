@@ -13,6 +13,7 @@ async function sendChat() {
     // Display User Message
     box.innerHTML += `<p><span class="user">You:</span> ${text}</p>`;
     input.value = '';
+    box.scrollTop = box.scrollHeight;
 
     try {
         const res = await fetch(location + '/chat', {
