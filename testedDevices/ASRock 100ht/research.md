@@ -19,4 +19,4 @@ max temp: 36 degrees.
 
 Adding all changes of test 8 from the aspire to the ASRock seems to be a significant improvement!, its still not as i would like it to be but its still a major improvement!
 
-Edit: nvm changes turned out to be inor on th ASRock :'(
+Edit: nvm changes turned out to be minor on th ASRock :'(
