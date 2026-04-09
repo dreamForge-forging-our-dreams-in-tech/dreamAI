@@ -28,6 +28,7 @@ async function sendChat() {
         box.scrollTop = box.scrollHeight;
     } catch (e) {
         box.innerHTML += `<p style="color:red">Error connecting to your JS server.</p>`;
+        box.scrollTop = box.scrollHeight;   
     }
 }
 

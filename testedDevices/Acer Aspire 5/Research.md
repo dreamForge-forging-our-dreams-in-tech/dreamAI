@@ -99,3 +99,46 @@ used ram: 6.30
 -- shortened math formulas for increased speed, although it did not give much improvement.
 
 -- added pre computing to Evie its for loop.
+
+# test 9
+
+Video: https://youtu.be/GtW99mZPhRA
+
+Training time: ~ 5 minutes (with extra training data)
+Used ram: 6.30
+temp: 37;
+
+So i was thinking for a bit and thought of adding a tokenizer to the training data, this seemed to be a really good idea as this significantly cut training time (40 seconds) but it has come with a cost of the loss number going under 0.5 at 25 again :(
+
+Okay i added the de_tokenizer and fixed a array parsing issue and training times cut to under 30s but the resposnes turned into: hellodreamAIe+your0000hellodreamAIe+your0000hellodreamAIe+your0000hellodreamAIe+your0000hellodreamAIe+
+
+Still masssive improvemenets in training which is really great.
+
+so this happens becuase i was parsing tokenized strings with a sceintific notation which the AI could process so those notations where now turned into arrays and that solved the issue, which made things far better but slowered the training time obviously but its still a 60 second cut from revious tests!
+Loss starts now at 2.5 instead of 3.6!
+
+The Ai still says random bs tho: ",is,is,my,?, ,." but that is most likely because i forgot to tokenize the users input.
+
+Added user tokenizing input and the AI keeps saying random bs: ,is,is,my,?, ,.
+So i grabbed gemini and asked whats causing it, turns out tf needs different layers for numbers or words (i keep learning new things!)
+
+Anyways after a lot of experimenting i managed to ge the ai to actually make sentences this time albeit it, it loops and spits out the training data instead of deciding itself, but its done training under 60 seconds so thats really great!
+
+I fixed the above but now it just spits out random stuff so ill have to dig into the training data some more.
+
+More training data only caused it to take longer and spit out more random bs, now testing with a higher epoch count of 120
+
+Okay ehm gemini helped me a bit with my code, i swear i have to disable gemini if i want to learn how a llm works!
+Anyways we changed its generate loop so it gets the best possible result because otherwise itll just go soup mode.
+interestingly this added changes to the speed to, it went from 30 minutes to 5, interesting.
+
+Sending the message to the AI just like how it has been trained (context: . user: what is your name?. response:) has imrpoved the responses and it now actually returns coherent sentences!
+Sadly due to lack of data it can still throw out incorrect responses :(
+
+Using decimal tekenization improved training speed but the AI keeps returning 0 0 0 0 0 0 0 0 0 0 0 0 0 :(
+It was a good idea but since tensorflow already turns numbers into decimals it gets the math confused so i'd be better of optimising either way tensorflow to work better with decimal tokenization or optimise all code to make it go faster.
+The improved speeds where probally because it just keeps spitting out zeros so it was probally jsut training on that padding (which is 0)
+Im curious now if the padding of 0 is actually what messses up the decimal tokenization because it kept spitting out arrays like so [[0.0], [0.0], [0.0], [0.001]] which then could be why the AI spits out so many zeros but this also happens with full numbers the only differnece is its not a decimal anymore, hmm interesting.
+Did a quick test and it doesn't seem like that that is the issue :(
+
+Decimals and integers will result in the same speeds if i where to be able to make it work, 1 + 1 and 0.1 + 0.1 take almost the same amount of time to calculate.

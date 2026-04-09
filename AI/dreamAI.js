@@ -2,11 +2,14 @@ import * as nodeUtil from 'util';
 import { readFile } from 'node:fs/promises';
 
 // 1. Import core and backends
-import * as tf from '@tensorflow/tfjs'; 
-import '@tensorflow/tfjs-backend-wasm'; 
-import '@tensorflow/tfjs-backend-cpu'; 
+import * as tf from '@tensorflow/tfjs';
+import '@tensorflow/tfjs-backend-wasm';
+import '@tensorflow/tfjs-backend-cpu';
 
 import { Evie } from './evie.js';
+
+import { Tokenizer } from './tokenizer/tokenizer.js';
+let tokenizer = new Tokenizer();
 
 // Polyfill for older environments
 if (typeof nodeUtil.isNullOrUndefined !== 'function') {
@@ -33,38 +36,84 @@ async function setInferenceBackend() {
     }
 }
 
-let total_epochs = 40; // how many epochs training will have.
+let total_epochs = 50; // how many epochs training will have.
+let ai_padding_token = 0; //what the padding token will be for the ai
+
 let training_progress = {};
 let model;
 let trainingData = [];
-let text, chars, charToId, idToChar, vocabSize;
-let seqLength = 30; 
+let vocabSize = 0;
+let seqLength = 10;
+let embeddingDims;
+
 
 class dreamAI {
-    constructor() {}
+    constructor() { }
 
     get_training_progress() {
         return JSON.stringify(training_progress);
     }
 
+    prepareDataset(tokenizedSentences, maxSequenceLen) {
+        let inputs = [];
+        let labels = [];
+
+        // 1. Loop through each sentence in your master array
+        for (let sentence of tokenizedSentences) {
+
+            // 2. For each sentence, slide across it word by word
+            for (let i = 1; i < sentence.length; i++) {
+                let inputSequence = sentence.slice(0, i); // Words up to now
+                const nextWord = sentence[i];             // The single target word
+
+                // 3. Pad the front of the sequence with zeros so it's exactly maxSequenceLen
+                while (inputSequence.length < maxSequenceLen) {
+                    inputSequence.unshift(ai_padding_token); // Add padding token (0) to the front
+                }
+
+                // 4. If it's too long, trim the oldest words from the front
+                if (inputSequence.length > maxSequenceLen) {
+                    inputSequence = inputSequence.slice(inputSequence.length - maxSequenceLen);
+                }
+
+                inputs.push(inputSequence);
+                labels.push(nextWord);
+            }
+        }
+
+        return { inputs, labels };
+
+    }
+
     async compile_ai(character_file_path) {
         try {
             trainingData = await this.build_trainging_data(character_file_path);
-            text = trainingData.join('\n');
-            chars = [...new Set(text)].sort();
-            charToId = Object.fromEntries(chars.map((c, i) => [c, i]));
-            idToChar = Object.fromEntries(chars.map((c, i) => [i, c]));
-            vocabSize = chars.length;
+
+            const { inputs, labels } = this.prepareDataset(trainingData, seqLength);
+
+            embeddingDims = 32; // How many numbers describe a single word
 
             model = tf.sequential();
-            model.add(tf.layers.embedding({ inputDim: vocabSize, outputDim: 16, inputLength: seqLength }));
-            model.add(tf.layers.lstm({ units: 64, returnSequences: false })); 
+
+            // 1. Embedding Layer: Converts letter IDs into 16-dimensional vectors
+            model.add(tf.layers.embedding({
+                inputDim: vocabSize,
+                outputDim: embeddingDims,
+                inputLength: seqLength // e.g., 10
+            }));
+
+            // 2. LSTM layer: Remembers the order of the letters
+            model.add(tf.layers.lstm({ units: 32, returnSequences: false })); // Bumped to 128 for more memory
+
+            // 3. Dense layer: Gives a probability score for every character in your vocab
             model.add(tf.layers.dense({ units: vocabSize, activation: 'softmax' }));
 
             model.compile({
-                loss: 'categoricalCrossentropy',
-                optimizer: Evie(0.01)
+                loss: 'sparseCategoricalCrossentropy', // 🔥 Fixed for integer targets!
+                optimizer: Evie(0.005) // 🔥 Slower learning rate prevents explosions
             });
+
+            return { inputs, labels }
         } catch (error) {
             console.error('Error compiling AI:', error);
             throw error;
@@ -74,29 +123,74 @@ class dreamAI {
     async build_trainging_data(character_file_path) {
         const data = await readFile(character_file_path, 'utf8');
         const character_json = JSON.parse(data);
-        
-        return [
-            `Context: . User: What is your name?. Response: My name is ${character_json.Name}`,
-            `Context: . User: Hello ${character_json.Name}. Response: Hi, how are you?`,
+
+        let tokenized_data = [];
+        let training_data_array = [
+            // --- GREETINGS ---
+            "Context: . User: hi. Response: Hello! How are you today? <END>",
+            "Context: . User: hello. Response: Hi there! What is on your mind? <END>",
+            "Context: . User: good morning. Response: Good morning! I hope you have a wonderful day. <END>",
+            "Context: . User: greetings. Response: Hello! Pleased to meet you. <END>",
+
+            // // --- IDENTITY / NAME ---
+            `Context: . User: what is your name?. Response: My name is ${character_json.Name}. <END>`,
+            `Context: . User: who are you?. Response: I am ${character_json.Name}, your friendly AI companion! <END>`,
+            `Context: . User: tell me your name. Response: You can call me ${character_json.Name}. <END>`,
+            `Context: . User: what should i call you?. Response: Please call me ${character_json.Name}! <END>`,
+
+            // --- SMALL TALK & WELL BEING ---
+            "Context: . User: how are you?. Response: I am doing great, thank you for asking! How are you? <END>",
+            "Context: . User: how is it going?. Response: It is going very well. What about you? <END>",
+            "Context: . User: are you okay?. Response: Yes, I am functioning perfectly! <END>",
+            "Context: . User: what are you doing?. Response: Just hanging out here, ready to chat with you. <END>",
+
+            // --- HUMAN INTERACTION REACTION ---
+            "Context: . User: i am sad. Response: Oh no, I am sorry to hear that. Can I help cheer you up? <END>",
+            "Context: . User: i am happy today. Response: That is wonderful! What made your day so good? <END>",
+            "Context: . User: i am bored. Response: Let us play a game or talk about something interesting then! <END>",
+            "Context: . User: thank you. Response: You are very welcome! <END>",
+            "Context: . User: thanks marie. Response: No problem at all, happy to help! <END>",
+
+            // --- CLOSINGS / GOODBYES ---
+            "Context: . User: bye. Response: Goodbye! Have a great day! <END>",
+            "Context: . User: see you later. Response: See you later! Take care. <END>",
+            "Context: . User: goodnight. Response: Goodnight! Sleep well. <END>",
+            "Context: . User: i have to go. Response: Alright, talk to you next time! <END>"
         ];
+
+        let maxIdFound = 0; // Keep track of the biggest number
+
+        for (let i of training_data_array) {
+            const tokens = tokenizer.tokenize(i);
+            tokenized_data.push(tokens);
+
+            // 🔍 Find the biggest ID inside this specific token array
+            const biggestInSentence = Math.max(...tokens);
+
+            // Update our master tracker if this sentence has a bigger number!
+            if (biggestInSentence > maxIdFound) {
+                maxIdFound = biggestInSentence;
+            }
+        }
+
+        // ✅ Set vocabSize to the highest ID + 1 (to account for zero padding!)
+        vocabSize = maxIdFound + 10;
+        vocabSize = Math.ceil(vocabSize);
+
+        return tokenized_data;
     }
 
     async train(character_file_path) {
         // Switch to CPU for training to avoid "Kernel not registered" errors
-        await setTrainingBackend();
-        await this.compile_ai(character_file_path);
 
-        const inputs = [];
-        const labels = [];
-        for (let i = 0; i < text.length - seqLength; i++) {
-            inputs.push(text.slice(i, i + seqLength).split('').map(c => charToId[c]));
-            labels.push(charToId[text[i + seqLength]]);
-        }
+        await setTrainingBackend();
+        const { inputs, labels } = await this.compile_ai(character_file_path);
 
         const xs = tf.tensor2d(inputs);
-        const ys = tf.oneHot(tf.tensor1d(labels, 'int32'), vocabSize);
+        const ys = tf.tensor2d(labels.map(l => [l]), [labels.length, 1], 'float32');
 
         console.log("🚀 Training starting on CPU Backend...");
+        console.time();
         await model.fit(xs, ys, {
             epochs: total_epochs,
             callbacks: {
@@ -110,33 +204,52 @@ class dreamAI {
                 }
             }
         });
-        
+
         xs.dispose();
         ys.dispose();
+
         console.log("✅ Training complete.");
+        console.timeEnd();
     }
 
-    async generate_prompt(context, userMsg) {
-        // Switch to WASM for faster generation if possible
-        await setInferenceBackend();
-        
-        let inputStr = `Context: ${context}. User: ${userMsg}. Response: `;
-        let currentSeq = inputStr.slice(-seqLength).padStart(seqLength, ' ');
-        let result = "";
+    async generate_prompt(seedWords, maxLenToGenerate = 30) {
+        let generatedWords = [...seedWords]; // Start with your user prompt tokens
+        let response = []; // where the actual response of the ai wil be stored without the user message in it.
 
-        for (let i = 0; i < 40; i++) {
-            const char = tf.tidy(() => {
-                const inputTensor = tf.tensor2d([currentSeq.split('').map(c => charToId[c] || 0)]);
-                const pred = model.predict(inputTensor);
-                const id = tf.argMax(pred, 1).dataSync()[0];
-                return idToChar[id];
+        for (let i = 0; i < maxLenToGenerate; i++) {
+            // 1. Pad the current input sequence to match the seqLength your model expects
+            let inputSequence = [...generatedWords];
+
+            while (inputSequence.length < seqLength) {
+                inputSequence.unshift(0); // Pad front with 0s
+            }
+            if (inputSequence.length > seqLength) {
+                inputSequence = inputSequence.slice(-seqLength); // Trim if too long
+            }
+
+            const nextWordId = tf.tidy(() => {
+                const inputTensor = tf.tensor2d([inputSequence], [1, seqLength]);
+                const logits = model.predict(inputTensor); // [1, vocabSize]
+
+                // 🎯 No temperature, no softmax, no multinomial! Just grab the highest peak!
+                const bestWordTensor = logits.argMax(1);
+                return bestWordTensor.dataSync()[0];
             });
 
-            if (char === '.' || char === '\n') break;
-            result += char;
-            currentSeq = (currentSeq + char).slice(-seqLength);
+            // 3. Add predicted word to our running sequence
+            generatedWords.push(nextWordId);
+            response.push(nextWordId);
+
+            console.log(nextWordId == tokenizer.tokenize('<end>').join());
+            // Optional: Break early if the AI outputs an <END> token (if you have one)
+            if (nextWordId == tokenizer.tokenize('<end>').join()) {
+                break;
+            }
         }
-        return result;
+
+        console.log(response.join().replaceAll(',', ' '))
+
+        return response.join().replaceAll(',', ' ');
     }
 }
 

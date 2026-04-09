@@ -9,6 +9,9 @@ import si from 'systeminformation';
 import { dreamAI } from './AI/dreamAI.js';
 let dream_ai = new dreamAI();
 
+import { Tokenizer } from './AI/tokenizer/tokenizer.js';
+let tokenizer = new Tokenizer();
+
 const app = express();
 const PORT = 5000;
 
@@ -31,10 +34,10 @@ app.get('/', (req, res) => {
 // --- CHAT ENDPOINT ---
 app.post('/chat', async (req, res) => {
   try {
-    const userPrompt = req.body.prompt;
+    const userPrompt = tokenizer.tokenize(`context: . user: ${req.body.prompt} response:`);
 
     dream_ai.train('./characters/Marie.json').then(async () => {
-      const reply = await dream_ai.generate_prompt("Hero", userPrompt);
+      const reply = tokenizer.de_tokenize(await dream_ai.generate_prompt(userPrompt));
       console.log("\nAI says:", reply);
 
       res.json({ reply: reply });

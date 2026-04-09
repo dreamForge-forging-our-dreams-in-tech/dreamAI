@@ -20,3 +20,11 @@ max temp: 36 degrees.
 Adding all changes of test 8 from the aspire to the ASRock seems to be a significant improvement!, its still not as i would like it to be but its still a major improvement!
 
 Edit: nvm changes turned out to be minor on th ASRock :'(
+
+# Test 4
+
+Video: https://youtu.be/k_vCvxmlRjI
+
+training time: 16 minutes
+Used ram: 4.70
+Temp: 40 degrees
