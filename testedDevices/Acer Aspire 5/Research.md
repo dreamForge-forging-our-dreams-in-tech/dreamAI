@@ -142,3 +142,10 @@ Im curious now if the padding of 0 is actually what messses up the decimal token
 Did a quick test and it doesn't seem like that that is the issue :(
 
 Decimals and integers will result in the same speeds if i where to be able to make it work, 1 + 1 and 0.1 + 0.1 take almost the same amount of time to calculate.
+
+# test 10
+
+I was thinking of adding multiple cpu core threading and first added this to the loss function/applyGradients, this seemed to be a awesome idea as this massively improved training quality albeit that it only cut training time with ~ 5-20 seconds.
+Weird thing is tho that even tho the loss drops quicker its responses are a bit well good quality or not so nothing much changed ...
+
+I have tried splitting the training to all available cores aswell however due to the complexity i used Gemini to help me which resulted in the picture in this folder named test10_Core_training.png

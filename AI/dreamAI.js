@@ -6,10 +6,17 @@ import * as tf from '@tensorflow/tfjs';
 import '@tensorflow/tfjs-backend-wasm';
 import '@tensorflow/tfjs-backend-cpu';
 
-import { Evie } from './evie.js';
+import { Evie } from './optimiser/evie.js';
 
 import { Tokenizer } from './tokenizer/tokenizer.js';
 let tokenizer = new Tokenizer();
+
+import { Worker } from 'worker_threads';
+import { fileURLToPath } from 'url';
+import path from 'path';
+
+// Fix for __dirname in ESM
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Polyfill for older environments
 if (typeof nodeUtil.isNullOrUndefined !== 'function') {
