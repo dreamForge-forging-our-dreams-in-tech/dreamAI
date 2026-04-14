@@ -149,3 +149,44 @@ I was thinking of adding multiple cpu core threading and first added this to the
 Weird thing is tho that even tho the loss drops quicker its responses are a bit well good quality or not so nothing much changed ...
 
 I have tried splitting the training to all available cores aswell however due to the complexity i used Gemini to help me which resulted in the picture in this folder named test10_Core_training.png
+
+Edit: I'm going back to the drawing board with this one
+# test 11
+
+Added optimiser worker threads to all available cpu cores instead of a default number of 4.
+Interestingly using more cpu cores on the optimiser has increased training (varying, somethimes its faster) time and but the loss number did reach 0.5 quicker.
+
+I also tried out loading the workers of the Evie optimiser when the server starts however this caused the training to flatline at 4.9 because the workers need to be tied to the class and not globally to avoid confusion.
+
+interestingly if i initialize the evie optimiser in a global variable it does work.
+
+I made os.availableParallelism() into os.availableParallelism() - 2 to ensure that not all cores are used by the workers, so the main thread has some breathing room, interestingly this worsened the loss number and training time.
+
+Interestingly i now changed it into os.availableParallelism() / 2 which seemed to have improved the quiality and decreased training time, albeit the training time got decreased from above statements as we already hit the 5 minutes mark, this means that technically there isnt much improvement in time.
+
+Well al the above seems to be very varying, ugh.
+
+I made the Evie optimiser initialize on compilation again and that improved time on the first test but if its gonna be anything like the above, it will probally be worser the second test.
+
+Just like i expected to happen it was slower and worser the second time.
+
+I went back to using all cores again and surprise surprise it didnt matter, nothing improved.
+
+Huh i went to using the optimiser on 2 cores and it hit 4:54 m:ss:mm however the loss number is less close to 0.5, interestingly, i dont think that this will do much on the ASRock because it only has 4 cores but its worth a test atleast.
+
+Its also varying again, FRICKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK, test 2 with this was 5 minutes instead of 4:54, test 3 was 4:54 (think this change can stay even if its small, every improvement is welcome!), test 4 was 4:49, interesting this actually improved training time!
+
+Now testing it with 3 cores! but tbh im rather curious how this will be on my ASRock because that has 4 cores instead of 10, 3 cores is 30 seconds slower?????? im so confused by this tbh.
+
+I went back to 2 cores again and this test was around 5 minutes and had a loss of 0.57 so the quality was better but not the time, interesting, it seems to be either have a better time or a lower loss number, did another test and it was around 5:10 wth is going on here.
+
+WTF is happening it just had a training time of 5:30 ????????, i ran another test with my device idle and it went to 5:01.
+
+WTH is going on it just went to 5:13 why does it vary so fucking much??
+Did another test ended up at 4:59, im so fucking confused as to whats going on here, why does it vary so much?
+
+so i did a quick research with gemini and he said that the v* engine needs to warm up and that the cpu core processes are moved around and suggested the first 2 options/task last one is mine just to see what happens with that.
+
+* use a new command to lock the used cpu cores to prevent process from being moved around
+* test warming up of V8 engine
+* check how everything is influenced by more variable core use
