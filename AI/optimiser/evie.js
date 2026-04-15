@@ -11,7 +11,6 @@ import os from 'os'
 // Fix for __dirname in ESM
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-console.log(os.availableParallelism(), "CPU cores detected, using", os.availableParallelism() - 2, "for training.");
 class EvieOptimizer extends tf.Optimizer {
     constructor(learningRate = 0.01, beta1 = 0.9, beta2 = 0.999, epsilon = 1e-8) {
         super();
@@ -20,7 +19,7 @@ class EvieOptimizer extends tf.Optimizer {
         this.beta2 = beta2;
         this.epsilon = epsilon;
         this.accumulators = new Map();
-        this.numCores = 2;
+        this.numCores = os.availableParallelism() - 1; // use all available cpu cores, for this you have to set the max needed cores via the start up command: taskset -c 0-8 node server.js
         this.workers = [];
 
         // Use a private map to store the actual Variable references

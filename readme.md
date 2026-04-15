@@ -14,9 +14,15 @@ Please be aware that when using this for any comemrcially available product you 
 
 # How it works?
 
-dreamAi uses tensorflow.tfjs to build its llm and uses character cards and controlled training data, context windows, variables and some other stuff to ensure the AI doesnt make your 200s pc catch fire because its writting is like shakespeare.
+dreamAi uses tensorflow.tfjs to build its llm and uses character cards and controlled training data, context windows, variables and some other stuff to ensure the AI doesnt make your 2000s pc catch fire because its writting is like shakespeare.
 <https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT8GWQKXDIsvdo2Crjeaq2R4kU8WZKZGJa3xA&s>
 
+# Starting a server
+
+1. cd into ypur folder where dreamAI is located/
+2. run taskset -c 0-10 node server.js.
+
+NOTE: change 0-10 with the amount of cpu cores you have available and ensure i extract 2 from them to give your pc some room to work with.
 # API
 
 Although dreamAi comes with its own frontend users are allowed to build their own front ends and can use the below API endpoints to do so!

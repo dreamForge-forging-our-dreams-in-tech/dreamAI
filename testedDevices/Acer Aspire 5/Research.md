@@ -187,6 +187,54 @@ Did another test ended up at 4:59, im so fucking confused as to whats going on h
 
 so i did a quick research with gemini and he said that the v* engine needs to warm up and that the cpu core processes are moved around and suggested the first 2 options/task last one is mine just to see what happens with that.
 
-* use a new command to lock the used cpu cores to prevent process from being moved around
-* test warming up of V8 engine
+* use a new command to lock the used cpu cores to prevent process from being moved around - check!
+* test warming up of V8 engine - check
 * check how everything is influenced by more variable core use
+
+# test 12 
+added a simple code to start using 75% procent of available cpu cores, to see how this improves time and more importantly how this improves with a warm up of the V8 engine.
+
+first test was 5:12 with a loss of 0.58, second one 4:59 with a loss of 0.59, test 3: 4:57 with a loss of 0.59, test 4: 4:58 with a loss of 0.65, test 5: 5:14 with a loss of 0.56, test 6: 5:26 with a loss of 0.64, this one is presumably higher because i was doing more tasks on the cpu.
+
+okay i switched to starting the node process with: taskset -c 0-8 node server.js
+
+this improved results a little bit, it stays under five minute slonger and even went under 4:54 twice! howver just like with the regular node server.js it eventually starts taking longer again.
+
+bottom line:
+* it needs a warm up
+* process arent allowed to be moved around.
+* it needs to have something to prevent memory leaks or atleast prevent the memory buss from getting filled too much, because thats when its starts taking longer to train, could possibly be fixed by having a dedicated training script that stops running once training gets finished.
+
+test to use full 100% of the available cpu cores when 75% is only opened to the process.
+
+Okay so i went on and tested how using 100% of the 75% avaialble cores runs and well, its crap still same effect as previously only drawback is its always above 5 minutes, so i think using 75% of 75% is great, ill test using all cores with taskset tomorrow.
+
+so i switched to: taskset -c 0-10 node server.js
+
+test 1: 4:53 with a loss of 0.62
+test 2: 4:52 with a loss of 0.60
+test 3 4:53 with a loss of 0.59
+test 4: 4:54 with a loss of 0.59
+test 5: 4:56 with a loss of 0.59
+
+using all cores while leaving 2 cores available for the os and preserving one core for the main thread has seemed to be a very good choice as we now have a traing time of around 4:50 minutes, warming up will only cut of 1 second of the training time so its not nessecary (how do i spell this word again) unsurprisingly after it reaches test 5 it starts taking longer again so im very curious as to why that is happening, ill have to run another 5 test to see if it has something to do with memory orsm.
+
+okay so i just did the test and its well dissapointing
+
+test 1: 4:56 with a loss of 0.6
+test 2: 5:04 with a loss of 0.63
+test 3: 5:06 with a loss of 0.59
+test 4: 5:07 with a loss of 0.61
+
+this is well sad but its good to see it started under 5 minutes tho!.
+well i jsut ran another test round and this time it had the same results as the first test.
+
+im keeping this change because it added improvements albeit weird ones so id have to look into memory management.
+
+I added propper tokenization for spaces aswel and this caused training tiem to go under 4:50 but due to impropper memory management it still goes up with 2 seconds every time.
+
+i just ran a quick test and it seems that there is no memory leak, so i wonder what exactly is going on here, something is slowing things down but what?
+
+There is really something weird going on i jsut trained it again and it took 5:10, if its no memory leak then what is it?
+
+i just did another test and it took 4:44 minutes to train, what the hell is going on here.

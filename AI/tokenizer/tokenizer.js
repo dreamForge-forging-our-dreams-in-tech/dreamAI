@@ -67,7 +67,10 @@ class Tokenizer {
     add_word(word) { // function to add any unknown word to the tokenizer_data.json
         let IDs = Object.values(tokenizer_data);
 
-        if (IDs.length === 0) IDs.push(0)
+        if (IDs.length === 0) {
+            IDs.push(0); // Start from 0 if there are no existing IDs
+            tokenizer_data[' '] = 0;
+        }
 
         let new_id = IDs[IDs.length - 1] + increase_id; // +1 because it counts from 1 and not from 0
         
