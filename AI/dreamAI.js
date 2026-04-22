@@ -55,7 +55,8 @@ let embeddingDims;
 
 
 class dreamAI {
-    constructor() { }
+    constructor() {
+    }
 
     get_training_progress() {
         return JSON.stringify(training_progress);
@@ -117,7 +118,7 @@ class dreamAI {
 
             model.compile({
                 loss: 'sparseCategoricalCrossentropy', // 🔥 Fixed for integer targets!
-                optimizer: Evie(0.005) // 🔥 Slower learning rate prevents explosions
+                optimizer: Evie(0.005) // Custom optimizer with a learning rate of 0.005
             });
 
             return { inputs, labels }
