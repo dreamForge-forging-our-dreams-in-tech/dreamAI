@@ -1,14 +1,9 @@
 import * as tf from '@tensorflow/tfjs';
-import '@tensorflow/tfjs-backend-wasm';
-import '@tensorflow/tfjs-backend-cpu';
-
-import { Worker } from 'worker_threads';
+import Piscina from 'piscina';
 import { fileURLToPath } from 'url';
 import path from 'path';
+import os from 'os';
 
-import os from 'os'
-
-// Fix for __dirname in ESM
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 class EvieOptimizer extends tf.Optimizer {
@@ -19,25 +14,21 @@ class EvieOptimizer extends tf.Optimizer {
         this.beta2 = beta2;
         this.epsilon = epsilon;
         this.accumulators = new Map();
-        this.numCores = os.availableParallelism() - 1; // use all available cpu cores, for this you have to set the max needed cores via the start up command: taskset -c 0-8 node server.js
-        this.workers = [];
-
-        // Use a private map to store the actual Variable references
         this.variableMap = new Map();
 
-        for (let i = 0; i < this.numCores; i++) {
-            console.log(`Spawning worker ${i + 1}/${this.numCores}`);
-
-            const workerPath = path.join(__dirname, 'optimiser_worker.js');
-            this.workers.push(new Worker(workerPath));
-        }
+        // Initialize Piscina Pool once
+        this.pool = new Piscina({
+            filename: path.resolve(__dirname, 'optimiser_worker.cjs'),
+            // Lock threads to physical cores for stability
+            maxThreads: Math.max(1, os.availableParallelism() / 2),
+            resourceLimits: {
+                maxOldGenerationSizeMb: 512 // Prevents GC from ballooning
+            }
+        });
     }
 
     async applyGradients(variableGradients) {
-        // 1. THE EMERGENCY RESCUE (Synchronous)
-        // No 'await' allowed before this block!
         const snapshots = [];
-
         const gradients = Array.isArray(variableGradients)
             ? variableGradients
             : Object.keys(variableGradients).map(name => ({ name, tensor: variableGradients[name] }));
@@ -45,57 +36,61 @@ class EvieOptimizer extends tf.Optimizer {
         for (const g of gradients) {
             if (!g.tensor) continue;
 
-            // Find the actual weight variable to get the current weight values
             const variable = tf.engine().registeredVariables[g.name] || this.variableMap.get(g.name);
-
             if (!this.variableMap.has(g.name)) {
                 this.variableMap.set(g.name, g.tensor);
             }
 
-            // SNAPSHOT BOTH: The Gradient AND the Current Weight
+            // Sync rescue to avoid the "Tensor disposed" error
             snapshots.push({
                 name: g.name,
-                gradValues: g.tensor.dataSync(),      // Rescue the Gradient
-                currentWeights: variable ? variable.dataSync() : null, // Rescue the Weight
+                gradValues: g.tensor.dataSync(),
+                currentWeights: variable ? variable.dataSync() : null,
                 shape: g.tensor.shape,
                 size: g.tensor.size
             });
         }
 
-        // 2. THE WORKER PHASE (Asynchronous)
+        // Processing Phase
         for (const data of snapshots) {
             const { name, gradValues, currentWeights, shape, size } = data;
-            const chunkSize = Math.ceil(size / this.numCores);
+            const numThreads = this.pool.options.maxThreads;
+            const chunkSize = Math.ceil(size / numThreads);
 
-            // Pass the pre-rescued 'gradValues' and 'currentWeights'
             const sabSet = this.getOrCreateSABs(name, gradValues, currentWeights, shape, size);
 
-            const promises = this.workers.map((worker, i) => {
-                return new Promise((resolve) => {
-                    const start = i * chunkSize;
-                    const end = Math.min(start + chunkSize, size);
-                    worker.once('message', resolve);
-                    worker.postMessage({
-                        range: [start, end],
-                        buffers: sabSet,
-                        params: {
-                            lr: this.learningRate,
-                            nextM_math: this.beta1,
-                            nextV_math: this.beta2,
-                            eps: this.epsilon
-                        }
-                    });
-                });
-            });
+            const tasks = [];
+            for (let i = 0; i < numThreads; i++) {
+                const start = i * chunkSize;
+                const end = Math.min(start + chunkSize, size);
 
-            await Promise.all(promises);
+                if (start >= size) break;
 
-            // 3. APPLY BACK
+                // piscina.run() replaces worker.postMessage()
+                tasks.push(this.pool.run({
+                    range: [start, end],
+                    buffers: sabSet,
+                    params: {
+                        lr: this.learningRate,
+                        nextM_math: this.beta1,
+                        nextV_math: this.beta2,
+                        eps: this.epsilon
+                    }
+                }));
+            }
+
+            // Wait for all chunks of this specific variable to finish
+            await Promise.all(tasks);
+
             const variable = tf.engine().registeredVariables[name] || this.variableMap.get(name);
             if (variable && variable.assign) {
-                tf.tidy(() => {
-                    variable.assign(tf.tensor(new Float32Array(sabSet.sharedVar), shape));
-                });
+                if (variable && variable.assign) {
+                    // Create the new tensor
+                    const nextWeights = tf.tensor(new Float32Array(sabSet.sharedVar), shape);
+                    variable.assign(nextWeights);
+                    // MANUALLY DISPOSE the temporary tensor immediately
+                    nextWeights.dispose();
+                }
             }
         }
     }
@@ -115,11 +110,7 @@ class EvieOptimizer extends tf.Optimizer {
             sharedVar: new SharedArrayBuffer(byteLength)
         };
 
-        // Use the values we rescued at the top of applyGradients
-        if (rescuedWeights) {
-            new Float32Array(sabs.sharedVar).set(rescuedWeights);
-        }
-
+        if (rescuedWeights) new Float32Array(sabs.sharedVar).set(rescuedWeights);
         new Float32Array(sabs.sharedM).fill(0);
         new Float32Array(sabs.sharedV).fill(0);
         new Float32Array(sabs.sharedGrad).set(rescuedGrad);

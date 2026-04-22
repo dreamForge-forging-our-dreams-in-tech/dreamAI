@@ -1,10 +1,9 @@
-import { parentPort } from 'worker_threads';
-
-parentPort.on('message', (data) => {
+// optimiser_worker.cjs
+module.exports = (data) => {
     const { range, buffers, params } = data;
     const [start, end] = range;
 
-    // Map the shared memory to typed arrays
+    // View the shared memory
     const grad = new Float32Array(buffers.sharedGrad);
     const m = new Float32Array(buffers.sharedM);
     const v = new Float32Array(buffers.sharedV);
@@ -15,11 +14,9 @@ parentPort.on('message', (data) => {
         m[i] = m[i] + (grad[i] - m[i]) * params.nextM_math;
         v[i] = v[i] + (Math.pow(grad[i], 2) - v[i]) * params.nextV_math;
 
-        // Note: Real Adam has bias correction, usually handled 
-        // by passing step counts to the worker.
         const update = (m[i] * params.lr) / (Math.sqrt(v[i]) + params.eps);
         varArr[i] -= update;
     }
 
-    parentPort.postMessage('done');
-});
+    return 'done';
+};

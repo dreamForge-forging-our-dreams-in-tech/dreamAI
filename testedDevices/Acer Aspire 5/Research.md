@@ -238,3 +238,10 @@ i just ran a quick test and it seems that there is no memory leak, so i wonder w
 There is really something weird going on i jsut trained it again and it took 5:10, if its no memory leak then what is it?
 
 i just did another test and it took 4:44 minutes to train, what the hell is going on here.
+
+# test 13
+I installed piscina because it should make the handling of worker threads easier, sadly the first test stayed around 5:15 which isnt a imporvement but actually worse, it still is variable and keeps getting longer with every test i ran.
+
+I decided to go to manual clean up of tenser and this made the training time shorter and now it only gets lojnger by 1 second instead of 2 but it is still taking too long.
+
+i added manual garbage colelcting and this causes too much overhead, it started great at 5:04 but increased with 3 seconds every test.
