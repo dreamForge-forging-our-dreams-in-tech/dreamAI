@@ -20,7 +20,7 @@ class EvieOptimizer extends tf.Optimizer {
         this.pool = new Piscina({
             filename: path.resolve(__dirname, 'optimiser_worker.cjs'),
             // Lock threads to physical cores for stability
-            maxThreads: Math.max(1, os.availableParallelism() / 2),
+            maxThreads: Math.max(1, os.availableParallelism() - 1),
             resourceLimits: {
                 maxOldGenerationSizeMb: 512 // Prevents GC from ballooning
             },

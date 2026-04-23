@@ -295,3 +295,18 @@ okay this test took 4:59 minutes., second: 5:02 and third: 5:01, fourth test was
 fresh test was: 5:04, second test: 5:07.
 
 Bottom line, making the functions forcefully wait for each other to complete has improved training, the backpressure is getting lower
+
+# test 14
+
+so out of curiosity i made the tokenizer tokenize every thing as a decimal e.g. 1.1, 1.2,1.3 interestingly this made training faster but the Ai kept saying 1, sadly this has not worked :(
+
+# test 15
+
+decided to give node full access to cpu again, first test: 4:57, second 5:59, third 5 minutes
+
+# test 16
+
+so i fixed a bug where a " " space wasnt properly tokenized in the training data now this has somewhat improved training time, its weird epoch 1 is now at 4.1 and epoch 2 at 2.8 but then after that its really slow again, in fact it didnt change anything, it still reaches under 1 at epoch 38, actually even at later epochs it reaches under 1 and it took 10 minutes to train, but that is probally because it somehow froze the training loop when i locked my laptop.
+it also seems that it is still injecting spaces but thats probally because it replaces all , (from the join operation) with spaces.
+
+There for i can safely say that there is no point of tokenizing the spaces in the training data and the reason the traing time doubled was because adding spaces for every word in a sentence made every sentence twice as long so traing would take twice as long
