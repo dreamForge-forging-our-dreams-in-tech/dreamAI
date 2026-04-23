@@ -310,3 +310,5 @@ so i fixed a bug where a " " space wasnt properly tokenized in the training data
 it also seems that it is still injecting spaces but thats probally because it replaces all , (from the join operation) with spaces.
 
 There for i can safely say that there is no point of tokenizing the spaces in the training data and the reason the traing time doubled was because adding spaces for every word in a sentence made every sentence twice as long so traing would take twice as long
+
+I want to test if making the words that appear the most have the smallest token ID, i expect its gonna be a little but its worth a try.

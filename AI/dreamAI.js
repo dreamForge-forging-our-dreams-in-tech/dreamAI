@@ -254,7 +254,7 @@ class dreamAI {
             response.push(nextWordId);
 
             // Optional: Break early if the AI outputs an <END> token (if you have one)
-            if (nextWordId == tokenizer.tokenize('<end>').join()) {
+            if (nextWordId === 0) {
                 break;
             }
         }
