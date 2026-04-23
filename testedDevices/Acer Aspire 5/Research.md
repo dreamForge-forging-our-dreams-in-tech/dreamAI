@@ -245,3 +245,53 @@ I installed piscina because it should make the handling of worker threads easier
 I decided to go to manual clean up of tenser and this made the training time shorter and now it only gets lojnger by 1 second instead of 2 but it is still taking too long.
 
 i added manual garbage colelcting and this causes too much overhead, it started great at 5:04 but increased with 3 seconds every test.
+
+so i just went back to the code used after i installed piscina nad im so confused it only becomes messier and messier.
+
+So i just did a cool test, bassically where i started up my pc and immediatly ran a fresh test, it eneded up taking 4:57 minutes.
+
+the second test i did was at 4:58 minutes.
+third at 4:59.
+fourth at 5:03.
+
+well its satill anoyingly increasing uggghhhhhhhhhhhhhhhhhh atleast it arent in big numbers any more.
+
+i made the create sab funtion use a variable now instead of creating 4 distinct Shared array Buffers, i expect minimal increasement in time but ill test it anyways.
+Crashes the training
+
+okay so i just did a fresh run again right after i started up my laptop it took 5:07 minutes, frick.
+Anyways i noticed that the beginning of the training is faster than once it is past the 10 epoch, this is interesting.
+
+I suspect this has to do with the garbage collector being overflowing with too much data, so im gonna test manual collecting and see what happens to the garbage collecotr.
+
+I should:
+Test with garbage collector
+add debugging timers for total training time and time between each epoch.
+
+I just did the first test with gc enabled and manual cleaning, it took 5:07.
+
+second test: 5:04
+THird test: 5:05
+
+new fresh test with gc tracing, 5:12 minutes, geez it kept smashing me with soo many debugging lines geez.
+interestingly it had constant allocation failures.
+
+okay so i added a breathing moment for the gc every 10 - 50 batches and it seems okayish,
+
+first test was 5:09, second 5:07, third one was at 5:14, godammit.
+
+just did another fresh run without gc and it took 5:10.
+
+okay so i removed all the changes of giving it breathing room and it took 4:54 minutes, it no longer overshoots itself but the longer it runs the slower it becomes.
+
+i added piscina max threads to a locked auto number and that crashes the system, so ill try forcing .run() into being async
+
+it still crashes but only after 40 epochs now.
+
+testing a max qeue of 100 instead of auto
+
+okay this test took 4:59 minutes., second: 5:02 and third: 5:01, fourth test was:5:02, fifth was: 5:05.
+
+fresh test was: 5:04, second test: 5:07.
+
+Bottom line, making the functions forcefully wait for each other to complete has improved training, the backpressure is getting lower

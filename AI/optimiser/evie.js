@@ -23,7 +23,10 @@ class EvieOptimizer extends tf.Optimizer {
             maxThreads: Math.max(1, os.availableParallelism() / 2),
             resourceLimits: {
                 maxOldGenerationSizeMb: 512 // Prevents GC from ballooning
-            }
+            },
+            maxQueue: 100,
+            concurrentTasksPerWorker: 1, // Forces linear math, reducing fluctuation
+            waitOnQueue: true // IMPORTANT: This makes pool.run return a promise that waits
         });
     }
 
@@ -84,15 +87,15 @@ class EvieOptimizer extends tf.Optimizer {
 
             const variable = tf.engine().registeredVariables[name] || this.variableMap.get(name);
             if (variable && variable.assign) {
-                if (variable && variable.assign) {
-                    // Create the new tensor
-                    const nextWeights = tf.tensor(new Float32Array(sabSet.sharedVar), shape);
-                    variable.assign(nextWeights);
-                    // MANUALLY DISPOSE the temporary tensor immediately
-                    nextWeights.dispose();
-                }
+                // Create the new tensor
+                const nextWeights = tf.tensor(new Float32Array(sabSet.sharedVar), shape);
+                variable.assign(nextWeights);
+                // MANUALLY DISPOSE the temporary tensor immediately
+                nextWeights.dispose();
             }
         }
+
+        await new Promise(resolve => setImmediate(resolve));
     }
 
     getOrCreateSABs(name, rescuedGrad, rescuedWeights, shape, size) {
@@ -103,6 +106,7 @@ class EvieOptimizer extends tf.Optimizer {
         }
 
         const byteLength = size * 4;
+
         const sabs = {
             sharedGrad: new SharedArrayBuffer(byteLength),
             sharedM: new SharedArrayBuffer(byteLength),

@@ -203,12 +203,9 @@ class dreamAI {
             epochs: total_epochs,
             callbacks: {
                 onBatchEnd: async (batch, logs) => {
-                    // 1. Give the Event Loop a tiny gap to run the Garbage Collector
-                    await new Promise(resolve => setImmediate(resolve));
-
-                    // 2. Force the engine to clear its internal tracking
-                    tf.engine().startScope();
-                    tf.engine().endScope();
+                    // if (batch % 20 === 0) {
+                    //     await new Promise(resolve => setImmediate(resolve));
+                    // }
                 },
                 onEpochEnd: (epoch, logs) => {
                     training_progress = {
