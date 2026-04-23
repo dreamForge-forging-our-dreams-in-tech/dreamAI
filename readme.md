@@ -20,7 +20,7 @@ dreamAi uses tensorflow.tfjs to build its llm and uses character cards and contr
 # Starting a server
 
 1. cd into ypur folder where dreamAI is located/
-2. run taskset -c 0-10 node server.js.
+2. run: taskset -c 0-10 node server.js.
 
 NOTE: change 0-10 with the amount of cpu cores you have available and ensure i extract 2 from them to give your pc some room to work with.
 # API

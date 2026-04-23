@@ -168,6 +168,7 @@ class dreamAI {
 
         let maxIdFound = 0; // Keep track of the biggest number
 
+        tokenizer.prepare_data(training_data_array); // prepare dataset for tokenization and add new words to tokenizer_data.json if needed.
         for (let i of training_data_array) {
             const tokens = tokenizer.tokenize(i);
             tokenized_data.push(tokens);

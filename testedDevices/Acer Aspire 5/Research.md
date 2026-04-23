@@ -312,3 +312,34 @@ it also seems that it is still injecting spaces but thats probally because it re
 There for i can safely say that there is no point of tokenizing the spaces in the training data and the reason the traing time doubled was because adding spaces for every word in a sentence made every sentence twice as long so traing would take twice as long
 
 I want to test if making the words that appear the most have the smallest token ID, i expect its gonna be a little but its worth a try.
+
+Problem is, since training time is still fluctuating it may be a bit harder to test if it correctly improves time.
+
+I am a genius, it has indeed been a performance boost it cut off 10 seconds of the training time and the loss number was actually dropping quicker!
+
+OMG i feel so accomplished even tho i probally wasnt the first to do it, lol.
+
+Quality improved, time improved, and loss got lower quicker, this is amazing!
+A idea i got by myself, someone else may have come before me but that doesnt matter!
+
+first test: 4:48
+second test: 4:54
+third test: 4:51
+fourth test: 4:53
+
+This is awesome for 3 tests in a row it has stayed under 5 minutes now!!!
+I can clearly see that it is a lot easier for the system to go through all the data now simply because i have made the most reoccuring words have the smallest tokenization ID which means less time spend on doing complex formulas because there are less complex formulas, IM A GENIUS (not that i am im just feeling very accomplished right now, lol)
+
+Sadly, its very clear that it is still fighting against the overhead of the GC and V8 engine :(, but it seems to be less fighting it, atleast thats what im thinking.
+
+# test 17
+
+this is another video test comibning the new piscina/worker threads core splitting and tokenization IDs being sorted by frequency of appereances from highest to lowest apereance.
+
+Video: https://youtu.be/R2bRwDcrwHs
+
+time: 4:53
+used ram: 6.46
+temp:37 degrees.
+
+aslo see: test 6 on ASRock.

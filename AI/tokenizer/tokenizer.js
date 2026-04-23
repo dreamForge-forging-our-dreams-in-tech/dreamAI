@@ -14,6 +14,31 @@ class Tokenizer {
 
     constructor() { }
 
+    // function that "prepares" the training data for tokenization.
+    // it finds the most used words from the training_array and lists them from msot used and least used.
+    // and then adds those words to the tokenizer_data.json with an id that is increased by 1 for every new word.
+    // it returns the result.
+    prepare_data(training_array) {
+        let i;
+        let words_counter = {};
+
+        for (i of training_array) {
+            i.split(' ').forEach(word => {
+                words_counter[word] = (words_counter[word] || 0) + 1; // Count the frequency of each word
+                words_counter = Object.fromEntries(Object.entries(words_counter).sort((a, b) => b[1] - a[1])); // Sort by frequency (most used first)
+
+               for (let word in words_counter) {
+                word = word.trim().toLowerCase();
+                    if (!tokenizer_data.hasOwnProperty(word)) {
+                        this.add_word(word);
+                    }
+                }
+            });
+        }
+
+        return words_counter;
+    }
+
     tokenize(input) { // tokenize a string input
         if (!input) return "";
 
@@ -25,14 +50,12 @@ class Tokenizer {
         //add a new word that it doesn't know yet to tokenizer_data.json
         let new_sentence = [];
         processedInput.split(' ').forEach(word => {
-            if (!sortedKeys.includes(word)) {
+            if (!tokenizer_data.hasOwnProperty(word)) {
                 this.add_word(word);
             }
-            new_sentence.push(tokenizer_data[word])
+            new_sentence.push(tokenizer_data[word]);
         });
 
-
-        //console.log("Tokenized Input:", processedInput);
         return new_sentence;
     }
 
@@ -73,7 +96,7 @@ class Tokenizer {
         }
 
         let new_id = IDs[IDs.length - 1] + increase_id; // +1 because it counts from 1 and not from 0
-        
+
         if (IDs.includes(new_id)) {
             new_id = new_id + increase_id; //if retireving the length fails or there is a duplicate grab the last id and increase it.
         }

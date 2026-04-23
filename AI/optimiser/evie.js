@@ -24,7 +24,7 @@ class EvieOptimizer extends tf.Optimizer {
             resourceLimits: {
                 maxOldGenerationSizeMb: 512 // Prevents GC from ballooning
             },
-            maxQueue: 100,
+            
             concurrentTasksPerWorker: 1, // Forces linear math, reducing fluctuation
             waitOnQueue: true // IMPORTANT: This makes pool.run return a promise that waits
         });
