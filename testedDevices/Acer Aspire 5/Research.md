@@ -343,3 +343,36 @@ used ram: 6.46
 temp:37 degrees.
 
 aslo see: test 6 on ASRock.
+
+# test 18
+so during some testing on the ASRock i noticed some issue with the max qeue size, so i decided to find the lowest possible number i can run with 16 cores so i can accurately make a math formula to make the max qeue size more dynamic, interestingly tho, the lower i got the better the performance became, atleast so it seems, it a little bit better performance wise, sadly training time does become longer with this, or atleast that happened with the first test., the second with a max qeue of 40 was 4:51, third test with a qeue of 30 was 4:41, second test with a qeue of 30 was 4:46, third test was 4:44, fourth test was also 4:44
+
+i tested it with a qeue of 20 and that works but is a performance bottleneck so 30 it is.
+
+so if a 16 core cpu doesnt crash at a qeue size of 30 while a 4 cpu core crashes with a qeue size of 100 at the 10th epoch then what is the qeue size the 4 core cpu needs?
+
+Okay this is weird i jsut tested the 30 qeue limit on my ASRock and it didnt crash at the 10th epoch and actually showed pretty good results, this is confusing.
+
+According to gemini: 
+The 4-core device now has a "ceiling." It can't over-promise work, so it stays within its RAM limits and avoids the crash.
+
+The 16-core device is now more "disciplined." Because it isn't juggling 1,000 pending tasks, its internal cache stays cleaner, allowing it to blast through the training faster.
+
+i think ill try out a qeue of 25 just to see what happens.
+
+ALso i limited my acer asprie to use 4 cores and that didnt affect training time at all so im wondering if that has to do with tge quality of the cpu cores.
+
+I just ran the first test and a qeue of 25 seems extremely promising, it went under a loss of 2 at the 20 epoch instead of 25, this is so interesting and exciting!
+
+the 30 qeue size on my as rock just finish at 14:53 minutes!!
+
+okay so running it at a qeue size of 25 is a bit weird it takes longer to training but the responses get a lot better :(
+
+    I ran a short test with a max of 28 but that was terrible, it takes longer and quality was shit and tbh, i dont know why.
+
+I ran some more tests and decided to stick to a qeue size of 30 because the response quality can be fixed with extra epochs which the extra time makes possible :)
+Id much rather have crap responses but faster training time than crap responses and slow training times.
+
++ i can look into optimising the loss more to make the responses better too.
+
+Sadly it still seems that there are fluctuations, even small, i did notice tho that the time is defined by startup sometimes i run the start script and it was steadily around 4:44 and sometimes i ran the start script at 4:55.

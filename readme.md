@@ -20,9 +20,10 @@ dreamAi uses tensorflow.tfjs to build its llm and uses character cards and contr
 # Starting a server
 
 1. cd into ypur folder where dreamAI is located/
-2. run: taskset -c 0-10 node server.js.
+2. run: node server.js.
 
 NOTE: change 0-10 with the amount of cpu cores you have available and ensure i extract 2 from them to give your pc some room to work with.
+
 # API
 
 Although dreamAi comes with its own frontend users are allowed to build their own front ends and can use the below API endpoints to do so!
@@ -58,4 +59,7 @@ This is a GET api endpoint that returns a JSON with information regarding the tr
     epoch: epoch + 1, -- the current epoch it's training
     loss: logs.loss.toFixed(4), -- the loss of the epoch
     total_epochs: this.params.epochs -- total epochs it going to run.
+    time_passed: `${mins}:${secs}.${Math.floor(mms/100)}`, // Format as MM:SS.MS // time passed in MM:SS:mm since training started.
+    start_time: start.toString(), // start of training
+    end_time: end.toString() // end of training
 }

@@ -16,21 +16,28 @@ class EvieOptimizer extends tf.Optimizer {
         this.accumulators = new Map();
         this.variableMap = new Map();
 
+        this.threads = Math.floor(os.availableParallelism() / 100 * 75); // Use 75% of available cpu cores
+
         // Initialize Piscina Pool once
         this.pool = new Piscina({
             filename: path.resolve(__dirname, 'optimiser_worker.cjs'),
-            // Lock threads to physical cores for stability
-            maxThreads: Math.max(1, os.availableParallelism() - 1),
+
             resourceLimits: {
                 maxOldGenerationSizeMb: 512 // Prevents GC from ballooning
             },
-            
+
+            maxQueue: 30, // Hard limit
+            maxThreads: this.threads, // Leave 1 core for the Main Thread, Lock threads to physical cores for stability
+            minThreads: this.threads, // Prevent "Cold Starts" of threads
+            idleTimeout: 30000, // Keep them alive  
             concurrentTasksPerWorker: 1, // Forces linear math, reducing fluctuation
-            waitOnQueue: true // IMPORTANT: This makes pool.run return a promise that waits
+
+            waitOnQueue: true, // IMPORTANT: This makes pool.run return a promise that waits
         });
     }
 
     async applyGradients(variableGradients) {
+
         const snapshots = [];
         const gradients = Array.isArray(variableGradients)
             ? variableGradients
@@ -52,6 +59,14 @@ class EvieOptimizer extends tf.Optimizer {
                 shape: g.tensor.shape,
                 size: g.tensor.size
             });
+        }
+
+        // HARD THROTTLE: If workers are busy, wait.
+
+        // This prevents the 'TaskQueueAtLimit' crash on 4-core devices.
+
+        while (this.pool.queueSize > 0) {
+            await new Promise(resolve => setTimeout(resolve, 1));
         }
 
         // Processing Phase

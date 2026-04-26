@@ -44,3 +44,17 @@ Sadly on the ASRock it has become incredibly fast in training but keeps overshoo
 so the ASRock took 13 minutes to train only for it to keep saying response: response: response:, lol but hey fucking 3 minutes off that is impresive, last training took 16 minutes
 
 ps the second test i ran on my acer aspire 5 took 4:43 seconds and the third 4:50, so it is fluctuating again ###############
+
+Okay so i introduced a hard throttle to the optimiser and introduced the max qeue again, this works okayish on my acer aspire 5, now on to to test it on my ASRock
+
+so added the hard throttle again but removed the qeue limit and the overshooting became less and the training time also became less
+
+Okay so i removed the max qeue size and setted the min/max threads to use 75% of avaialble cores and this has removed the overshooting and gave the same results on my ASRock and Acer Aspire 5, HOORAY, thanks to gemini in telling me how i can keep cores more fresh and all.
+
+Same results started appearing on my acer aspire so i hope that if i fix thses bugs on my acer that i also fix them on my ASRock, albeit my acer aspire is a little less like the results of the ASRock
+
+Its so funny sometimes it loss drops by 0.5 and sometimes by 3 just like on my acer
+
+total training of my ASRock took 15:23
+
+first time on my acer was 4:49 and the second time was 4:56, the fluctuations are back due to the removal of the qeue size, so i wonder what happens if i make the max qeue size also dynamic to the avaialble cpu cores.

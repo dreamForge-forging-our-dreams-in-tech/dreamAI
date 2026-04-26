@@ -199,7 +199,8 @@ class dreamAI {
         const ys = tf.tensor2d(labels.map(l => [l]), [labels.length, 1], 'float32');
 
         console.log("🚀 Training starting on CPU Backend...");
-        console.time();
+        const start = new Date();
+
         await model.fit(xs, ys, {
             epochs: total_epochs,
             callbacks: {
@@ -209,10 +210,22 @@ class dreamAI {
                     // }
                 },
                 onEpochEnd: (epoch, logs) => {
+                    const end = new Date();
+
+                    // Calculate the difference in total milliseconds
+                    const diff = end - start;
+
+                    const mins = Math.floor(diff / 60000);
+                    const secs = Math.floor((diff % 60000) / 1000);
+                    const mms = diff % 1000;
+
                     training_progress = {
                         epoch: epoch + 1,
                         loss: logs.loss.toFixed(4),
-                        total_epochs: total_epochs
+                        total_epochs: total_epochs,
+                        time_passed: `${mins}:${secs}.${Math.floor(mms/100)}`, // Format as MM:SS.MS
+                        start_time: start.toString(),
+                        end_time: end.toString()
                     };
                     console.log(`Epoch ${epoch}: loss = ${logs.loss}`);
                 }
@@ -223,7 +236,6 @@ class dreamAI {
         ys.dispose();
 
         console.log("✅ Training complete.");
-        console.timeEnd();
     }
 
     async generate_prompt(seedWords, maxLenToGenerate = 30) {

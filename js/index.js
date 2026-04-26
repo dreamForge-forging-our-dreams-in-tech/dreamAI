@@ -2,6 +2,8 @@ let location = window.location.origin; // location of the url bar used to send t
 
 let hardware_information = document.getElementById('display');
 
+let training_progress = document.getElementById('training_progress');
+
 async function sendChat() {
     checkStatuses(); // checks all statuses when a new message is send
 
@@ -28,7 +30,7 @@ async function sendChat() {
         box.scrollTop = box.scrollHeight;
     } catch (e) {
         box.innerHTML += `<p style="color:red">Error connecting to your JS server.</p>`;
-        box.scrollTop = box.scrollHeight;   
+        box.scrollTop = box.scrollHeight;
     }
 }
 
@@ -65,13 +67,18 @@ function checkStatuses() {
             data = JSON.parse(data);
 
             if (data.total_epochs === 'undefined' || data.total_epochs == data.epoch) {
-                document.getElementById('training_progress').innerHTML = `Training finished/not in progress.`;
+                training_progress.innerHTML = `Training finished/not in progress.<br>`;
             } else {
-
-                document.getElementById('training_progress').innerHTML = `Training in progress: <br>
+                training_progress.innerHTML = `Training in progress: <br>
                 Epoch: ${data.epoch}/${data.total_epochs} <br>
-                Loss: ${data.loss}`;
+                Loss: ${data.loss} <br>`;
             }
+
+            training_progress.innerHTML += `
+            Time passed: ${data.time_passed}<br>
+                Started at: ${data.start_time}<br>
+                Ended at: ${data.end_time}<br>
+                `;
         });
 }
 
