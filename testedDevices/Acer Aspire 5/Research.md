@@ -376,3 +376,12 @@ Id much rather have crap responses but faster training time than crap responses 
 + i can look into optimising the loss more to make the responses better too.
 
 Sadly it still seems that there are fluctuations, even small, i did notice tho that the time is defined by startup sometimes i run the start script and it was steadily around 4:44 and sometimes i ran the start script at 4:55.
+
+Okay so i added a await function before the pool.run and it seems to be a bit werid, i havent fully tested it yet but i think it reintroduces that number go up creep, im not sure but i have to test it more.
+
+Okay so it is not nessecary stable, infact it worse quality is shit and time is shitty again.
+So i removed the promise.all to see how that reacts and its probaly not gonna be any better, it was indeed not any better.
+
+i immediatlely reversed it and it instantly became better.
+
+I think i have optimised the system enough and that all those fluctuations are more casued by the OS rather than my code, if i can optimise training data and all and make everything small i may be able to make it fluctuate less.

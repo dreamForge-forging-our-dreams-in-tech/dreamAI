@@ -62,9 +62,7 @@ class EvieOptimizer extends tf.Optimizer {
         }
 
         // HARD THROTTLE: If workers are busy, wait.
-
         // This prevents the 'TaskQueueAtLimit' crash on 4-core devices.
-
         while (this.pool.queueSize > 0) {
             await new Promise(resolve => setTimeout(resolve, 1));
         }

@@ -223,7 +223,7 @@ class dreamAI {
                         epoch: epoch + 1,
                         loss: logs.loss.toFixed(4),
                         total_epochs: total_epochs,
-                        time_passed: `${mins}:${secs}.${Math.floor(mms/100)}`, // Format as MM:SS.MS
+                        time_passed: `${mins}:${secs}:${Math.floor(mms/100)}`, // Format as MM:SS.MS
                         start_time: start.toString(),
                         end_time: end.toString()
                     };
