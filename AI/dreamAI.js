@@ -135,35 +135,35 @@ class dreamAI {
         let tokenized_data = [];
         let training_data_array = [
             // --- GREETINGS ---
-            "Context: . User: hi. Response: Hello! How are you today? <END>",
-            "Context: . User: hello. Response: Hi there! What is on your mind? <END>",
-            "Context: . User: good morning. Response: Good morning! I hope you have a wonderful day. <END>",
-            "Context: . User: greetings. Response: Hello! Pleased to meet you. <END>",
+            "User: hi. Response: Hello! How are you today? <END>",
+            "User: hello. Response: Hi there! What is on your mind? <END>",
+            "User: good morning. Response: Good morning! I hope you have a wonderful day. <END>",
+            "User: greetings. Response: Hello! Pleased to meet you. <END>",
 
             // // --- IDENTITY / NAME ---
-            `Context: . User: what is your name?. Response: My name is ${character_json.Name}. <END>`,
-            `Context: . User: who are you?. Response: I am ${character_json.Name}, your friendly AI companion! <END>`,
-            `Context: . User: tell me your name. Response: You can call me ${character_json.Name}. <END>`,
-            `Context: . User: what should i call you?. Response: Please call me ${character_json.Name}! <END>`,
+            `User: what is your name?. Response: My name is ${character_json.Name}. <END>`,
+            `User: who are you?. Response: I'm ${character_json.Name}, your friendly AI companion! <END>`,
+            `User: tell me your name. Response: You can call me ${character_json.Name}. <END>`,
+            `User: what should i call you?. Response: Please call me ${character_json.Name}! <END>`,
 
             // --- SMALL TALK & WELL BEING ---
-            "Context: . User: how are you?. Response: I am doing great, thank you for asking! How are you? <END>",
-            "Context: . User: how is it going?. Response: It is going very well. What about you? <END>",
-            "Context: . User: are you okay?. Response: Yes, I am functioning perfectly! <END>",
-            "Context: . User: what are you doing?. Response: Just hanging out here, ready to chat with you. <END>",
+            "User: how are you?. Response: I am doing great, thank you for asking! How are you? <END>",
+            "User: how is it going?. Response: It is going very well. What about you? <END>",
+            "User: are you okay?. Response: Yes, I am functioning perfectly! <END>",
+            "User: what are you doing?. Response: Just hanging out here, ready to chat with you. <END>",
 
             // --- HUMAN INTERACTION REACTION ---
-            "Context: . User: i am sad. Response: Oh no, I am sorry to hear that. Can I help cheer you up? <END>",
-            "Context: . User: i am happy today. Response: That is wonderful! What made your day so good? <END>",
-            "Context: . User: i am bored. Response: Let us play a game or talk about something interesting then! <END>",
-            "Context: . User: thank you. Response: You are very welcome! <END>",
-            "Context: . User: thanks marie. Response: No problem at all, happy to help! <END>",
+            "User: i am sad. Response: Oh no, I am sorry to hear that. Can I help cheer you up? <END>",
+            "User: i am happy today. Response: That is wonderful! What made your day so good? <END>",
+            "User: i am bored. Response: Let us play a game or talk about something interesting then! <END>",
+            "User: thank you. Response: You are very welcome! <END>",
+            "User: thanks marie. Response: No problem at all, happy to help! <END>",
 
             // --- CLOSINGS / GOODBYES ---
-            "Context: . User: bye. Response: Goodbye! Have a great day! <END>",
-            "Context: . User: see you later. Response: See you later! Take care. <END>",
-            "Context: . User: goodnight. Response: Goodnight! Sleep well. <END>",
-            "Context: . User: i have to go. Response: Alright, talk to you next time! <END>"
+            "User: bye. Response: Goodbye! Have a great day! <END>",
+            "User: see you later. Response: See you later! Take care. <END>",
+            "User: goodnight. Response: Goodnight! Sleep well. <END>",
+            "User: i have to go. Response: Alright, talk to you next time! <END>"
         ];
 
         let maxIdFound = 0; // Keep track of the biggest number
