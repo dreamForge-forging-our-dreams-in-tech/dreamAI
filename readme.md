@@ -19,10 +19,8 @@ dreamAi uses tensorflow.tfjs to build its llm and uses character cards and contr
 
 # Starting a server
 
-1. cd into ypur folder where dreamAI is located/
+1. cd into ypur folder where dreamAI is located
 2. run: node server.js.
-
-NOTE: change 0-10 with the amount of cpu cores you have available and ensure i extract 2 from them to give your pc some room to work with.
 
 # API
 
@@ -58,8 +56,26 @@ This is a GET api endpoint that returns a JSON with information regarding the tr
 {
     epoch: epoch + 1, -- the current epoch it's training
     loss: logs.loss.toFixed(4), -- the loss of the epoch
+    lossDiff: epoch === 0 ? 0 : (training_progress.loss - logs.loss).toFixed(4), -- difference of loss compared to last epoch,
+    learningRate: EvieOptimizerInstance.learningRate, -- the learning rate that the optimiser is currently working with.
+                        overshot: epoch > 0 ? (training_progress.loss - logs.loss) < 0 : false, -- overshot, if true or false
     total_epochs: this.params.epochs -- total epochs it going to run.
     time_passed: `${mins}:${secs}.${Math.floor(mms/100)}`, // Format as MM:SS.MS // time passed in MM:SS:mm since training started.
     start_time: start.toString(), // start of training
     end_time: end.toString() // end of training
+    epoch_time: `${epoch_mins}:${epoch_secs}:${Math.floor(epoch_mms / 100)}`, //how long a epoch took before it finished
 }
+
+# dreamAI class
+
+## importing 
+import { dreamAI } from './AI/dreamAI.js';
+let dream_ai = new dreamAI();
+
+## functions
+
+### loadCharacter - Required to call before train
+The loadCharacter function takes a file path and loads the characters json file in a global variable accesible in the class.
+The function returns the loaded json file and tells the system to switch the AI to that character/persona.
+
+This function must always be called before train if no character has been loaded yet!

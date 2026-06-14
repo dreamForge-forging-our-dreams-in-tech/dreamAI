@@ -34,9 +34,11 @@ app.get('/', (req, res) => {
 // --- CHAT ENDPOINT ---
 app.post('/chat', async (req, res) => {
   try {
-    const userPrompt = tokenizer.tokenize(`user: ${req.body.prompt} response:`);
+    const userPrompt = tokenizer.tokenize(`user: ${req.body.prompt} response: `);
 
-    dream_ai.train('./characters/Marie.json').then(async () => {
+    await dream_ai.loadCharacter('./characters/Marie.json');
+
+    dream_ai.train().then(async () => {
       const reply = tokenizer.de_tokenize(await dream_ai.generate_prompt(userPrompt));
       console.log("\nAI says:", reply);
 

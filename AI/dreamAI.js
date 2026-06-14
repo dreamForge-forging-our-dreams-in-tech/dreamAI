@@ -7,6 +7,7 @@ import '@tensorflow/tfjs-backend-wasm';
 import '@tensorflow/tfjs-backend-cpu';
 
 import { Evie } from './optimiser/evie.js';
+let EvieOptimizerInstance = new Evie(0.02); // Create an instance of the Evie optimizer with a learning rate of 0.005
 
 import { Tokenizer } from './tokenizer/tokenizer.js';
 let tokenizer = new Tokenizer();
@@ -43,7 +44,7 @@ async function setInferenceBackend() {
     }
 }
 
-let total_epochs = 50; // how many epochs training will have.
+let total_epochs = 27; // how many epochs training will have.
 let ai_padding_token = 0; //what the padding token will be for the ai
 
 let training_progress = {};
@@ -56,6 +57,19 @@ let embeddingDims;
 
 class dreamAI {
     constructor() {
+    }
+
+    async loadCharacter(character_file_path) {
+        if(this.character_JSON) { // character already loaded, just return the json.
+            console.log('Character already loaded')
+            return this.character_JSON;
+        }
+
+        let data = await readFile(character_file_path, 'utf8');
+        let character_json = JSON.parse(data);
+
+        this.character_JSON = character_json;
+        return this.character_JSON;
     }
 
     get_training_progress() {
@@ -93,9 +107,9 @@ class dreamAI {
 
     }
 
-    async compile_ai(character_file_path) {
+    async compile_ai() {
         try {
-            trainingData = await this.build_trainging_data(character_file_path);
+            trainingData = await this.build_trainging_data();
 
             const { inputs, labels } = this.prepareDataset(trainingData, seqLength);
 
@@ -118,7 +132,7 @@ class dreamAI {
 
             model.compile({
                 loss: 'sparseCategoricalCrossentropy', // 🔥 Fixed for integer targets!
-                optimizer: Evie(0.005) // Custom optimizer with a learning rate of 0.005
+                optimizer: EvieOptimizerInstance // Custom optimizer with a learning rate of 0.005
             });
 
             return { inputs, labels }
@@ -128,10 +142,7 @@ class dreamAI {
         }
     }
 
-    async build_trainging_data(character_file_path) {
-        const data = await readFile(character_file_path, 'utf8');
-        const character_json = JSON.parse(data);
-
+    async build_trainging_data() {
         let tokenized_data = [];
         let training_data_array = [
             // --- GREETINGS ---
@@ -141,10 +152,10 @@ class dreamAI {
             "User: greetings. Response: Hello! Pleased to meet you. <END>",
 
             // // --- IDENTITY / NAME ---
-            `User: what is your name?. Response: My name is ${character_json.Name}. <END>`,
-            `User: who are you?. Response: I'm ${character_json.Name}, your friendly AI companion! <END>`,
-            `User: tell me your name. Response: You can call me ${character_json.Name}. <END>`,
-            `User: what should i call you?. Response: Please call me ${character_json.Name}! <END>`,
+            `User: what is your name?. Response: My name is [${this.character_JSON.NAME}]. <END>`,
+            `User: who are you?. Response: I'm ${this.character_JSON.NAME}, your friendly AI companion! <END>`,
+            `User: tell me your name. Response: You can call me ${this.character_JSON.NAME}. <END>`,
+            `User: what should i call you?. Response: Please call me ${this.character_JSON.NAME}! <END>`,
 
             // --- SMALL TALK & WELL BEING ---
             "User: how are you?. Response: I am doing great, thank you for asking! How are you? <END>",
@@ -189,45 +200,59 @@ class dreamAI {
         return tokenized_data;
     }
 
-    async train(character_file_path) {
+    async train() {
         // Switch to CPU for training to avoid "Kernel not registered" errors
 
         await setTrainingBackend();
-        const { inputs, labels } = await this.compile_ai(character_file_path);
+        const { inputs, labels } = await this.compile_ai();
 
-        const xs = tf.tensor2d(inputs);
-        const ys = tf.tensor2d(labels.map(l => [l]), [labels.length, 1], 'float32');
+        const xs = tf.tensor2d(inputs, [inputs.length, seqLength], 'int32');
+        const ys = tf.tensor1d(labels, 'float32');
 
         console.log("🚀 Training starting on CPU Backend...");
         const start = new Date();
+        let epoch_start;
 
         await model.fit(xs, ys, {
             epochs: total_epochs,
             callbacks: {
-                onBatchEnd: async (batch, logs) => {
-                    // if (batch % 20 === 0) {
-                    //     await new Promise(resolve => setImmediate(resolve));
-                    // }
+                onEpochBegin: (epoch, logs) => {
+                    epoch_start = new Date();
                 },
+
                 onEpochEnd: (epoch, logs) => {
                     const end = new Date();
 
                     // Calculate the difference in total milliseconds
                     const diff = end - start;
+                    const epoch_diff = end - epoch_start;
 
                     const mins = Math.floor(diff / 60000);
                     const secs = Math.floor((diff % 60000) / 1000);
                     const mms = diff % 1000;
 
+                    const epoch_mins = Math.floor(epoch_diff / 60000);
+                    const epoch_secs = Math.floor((epoch_diff % 60000) / 1000);
+                    const epoch_mms = epoch_diff % 1000;
+
                     training_progress = {
                         epoch: epoch + 1,
-                        loss: logs.loss.toFixed(4),
                         total_epochs: total_epochs,
-                        time_passed: `${mins}:${secs}:${Math.floor(mms/100)}`, // Format as MM:SS.MS
+
+                        learningRate: EvieOptimizerInstance.learningRate,
+
+                        loss: logs.loss.toFixed(4),
+                        lossDiff: epoch === 0 ? 0 : (training_progress.loss - logs.loss).toFixed(4),
+
+                        overshot: epoch > 0 ? (training_progress.loss - logs.loss) < 0 : false,
+
+                        time_passed: `${mins}:${secs}:${Math.floor(mms / 100)}`, // Format as MM:SS.MS
+                        epoch_time: `${epoch_mins}:${epoch_secs}:${Math.floor(epoch_mms / 100)}`,
                         start_time: start.toString(),
                         end_time: end.toString()
                     };
-                    console.log(`Epoch ${epoch}: loss = ${logs.loss}`);
+
+                    console.log(training_progress);
                 }
             }
         });

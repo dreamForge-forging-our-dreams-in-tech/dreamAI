@@ -36,6 +36,15 @@ class EvieOptimizer extends tf.Optimizer {
         });
     }
 
+    changeLearningRate(newLr) {
+        if (typeof newLr !== 'number' || newLr <= 0) {
+            console.warn("A darling try, but learning rate must be a positive number!");
+            return;
+        }
+        this.learningRate = newLr;
+        console.log(`[Optimizer] Learning rate successfully changed to: ${this.learningRate}`);
+    }
+
     async applyGradients(variableGradients) {
 
         const snapshots = [];

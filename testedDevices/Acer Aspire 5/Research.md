@@ -385,3 +385,23 @@ So i removed the promise.all to see how that reacts and its probaly not gonna be
 i immediatlely reversed it and it instantly became better.
 
 I think i have optimised the system enough and that all those fluctuations are more casued by the OS rather than my code, if i can optimise training data and all and make everything small i may be able to make it fluctuate less.
+
+# test 19
+
+Removing unused data (Context: . ) from training data abviously improved training time
+
+# test 20
+This was just a simple test run to find the highest most possible lr, currently ended up at 0.02, maybe be even possible to go higher but it took quite some time so im taking abreak from that, unfortunately, theres something weird going on but at the same time nothing much changed from previous tests, the AI its response is still terrible and inacurate but sentecnes seem to be okay-ish.
+However the AI responding with incorrect sentences to me seems to be that i just typed my messages without punctuation which made the Ai unable to recognize the reponses yet because training data has correct punctuation, lol.
+I ran multiple tests with this and the punctuation seems to be the main problem.
+
+# test 21
+I added propper splitting of words but unfortunately this hasnt done much with training times and the time is still around the same level.
+
+# test 22
+
+I asked copilot if he had suggestions, naturally im still learning so i dont know how everything entirely works, he suggest that turning the xs and xy variables from: xs = tf.tensor2d(inputs);
+const ys = tf.tensor2d(labels.map(l => [l]), [labels.length, 1], 'float32'); to: const xs = tf.tensor2d(inputs, [inputs.length, seqLength], 'int32');
+const ys = tf.tensor1d(labels, 'int32');
+
+whcih seems to be slightly more stable and faster, quite interesting how such a small change can have a good effect on this. but like usual, its still fluctuating between time and quality, so while this changed allowed for a better chance at better quality or shorter training time, its not a big improvement.

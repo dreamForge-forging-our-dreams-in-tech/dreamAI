@@ -71,7 +71,11 @@ function checkStatuses() {
             } else {
                 training_progress.innerHTML = `Training in progress: <br>
                 Epoch: ${data.epoch}/${data.total_epochs} <br>
-                Loss: ${data.loss} <br>`;
+                Epoch Time: ${data.epoch_time} <br>
+                Loss: ${data.loss} <br>
+                Loss Diff: ${data.lossDiff} <br>
+                Overshot: ${data.overshot} <br>
+                Learning Rate: ${data.learningRate} <br>`;
             }
 
             training_progress.innerHTML += `
